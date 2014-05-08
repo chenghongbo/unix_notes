@@ -1,0 +1,70 @@
+###    NOTE      #############
+
+### due to difference in OS and its versions, platforms, 
+###        executable version and behaviors, these commands/tips
+### may NOT work for you
+
+[ VIM ] use :g/^$/d to remove empty lines
+## g to apply to all lines that match the regex /^$/; d to delete
+
+[ VIM ] :sort u to remove dulicate lines
+
+[ AWK ] awk -F"," '{if ($9 == $10) {print $9}};' $file
+[ AWK ] or awk -F"," '$9 == $10 {print $9};' $file
+## if field 9 is the same as field 10, print field 9
+
+[ VIM ] in vim, use \r to reprent new line characters, instead of \n
+
+[ GREP ] grep -A1 $pattern $file
+## display matching line and the line after it
+## or use awk '/match this/ { print;getline;print}' $file
+
+[ GIT ] git clone repo-uri to clone a repo
+
+[ WGET ] wget --recursive --no-clobber --domains example.com --no-parent example.com
+## download website recursively
+
+## 6226090210727349
+
+[ perforce ] p4 changelists -s pending -u hongboc
+## list pending changes for user hongboc
+
+## or use p4 changes -c hongboc_filterdist_config.as_dev -s pending
+## results are different. need to find out why
+
+[ perfoce ] p4 changes -u joe 
+# to list all changes belong to suer joe
+
+[ perfoce ] p4 revert -c 12345 
+# to revert all files pending change list 12345
+
+[ perfoce ] p4 client -d <client> 
+## to delete a client
+
+[ perforce ] p4 change -d <change number>
+## to delete a change
+
+[ perforce ] p4 opened
+## to Lists files currently opened in pending changelists
+
+[ C SHELL ] foreach loop structure
+## foreach i ( one two three )
+## 	echo $i
+## end
+
+[ AWK ] awk  'BEGIN {OFS="\t"};{ if ($3 ~ /[\^|\$]/) {$3 = "/"$3"/";};print $0}' $file
+## change 3rd field of $file if it starts with ^ or ends with $
+## output content using "\t" as field seperator
+
+[ GCC ] objdump --full-contents --section=.comment  $bin
+## to check the compiler used to produce binary file $bin
+
+[ GAWK ] gawk  'BEGIN {OFS="\t"};{ if ($4 ~ /\yat\y|\yathr\y/) {$5 = "new value";}; {print $0;};}' $file
+## change 5th field to "new value" if 4th field is "at" or "athr", then print the entire file
+## \y is regexp for word boundary (\b is for backspace)
+
+[ VIM ] :g/^duma/s/$/ -w/
+## append " -w" to every line that starts with duma
+
+[ DragonFlyBSD ] ifconfig re0 media 1000baseT mediaopt full-duplex
+## set re0 interface to 1000M duplex
