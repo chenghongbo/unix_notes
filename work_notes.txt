@@ -68,3 +68,9 @@
 
 [ DragonFlyBSD ] ifconfig re0 media 1000baseT mediaopt full-duplex
 ## set re0 interface to 1000M duplex
+
+[ SED ] sed s/old/new/2 $file
+## replace 2nd occrance of old with new
+
+[ Linux ] mount tmpfs /tmp -t tmpfs -o size=256m 
+## mount a tmpfs file system to /tmp of size 256MB
