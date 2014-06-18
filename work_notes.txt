@@ -77,3 +77,6 @@
 
 [ perforce ] p4 changes $file changelist
 ## view change list for $file
+
+[ AWK ] awk '{printf("%-20s,%-8s",$1,$2)}' $file
+## print the 1st and 2nd field of $file, aligned to the left, with width of 20 and 8 respectively
