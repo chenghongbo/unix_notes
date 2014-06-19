@@ -80,3 +80,6 @@
 
 [ AWK ] awk '{printf("%-20s,%-8s",$1,$2)}' $file
 ## print the 1st and 2nd field of $file, aligned to the left, with width of 20 and 8 respectively
+
+[ SED ] sed -i '3i This is a line to be added to a file' file_name
+## add the line "This is a line to be added to a file" to file_name at line number 3
