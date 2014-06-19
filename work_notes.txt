@@ -83,3 +83,6 @@
 
 [ SED ] sed -i '3i This is a line to be added to a file' file_name
 ## add the line "This is a line to be added to a file" to file_name at line number 3
+
+[ SED ] sed -i '/^# upgrade to new filter version$/i \export PERM_DENY_UNTIL_ALLOWED=yes\n' file_name
+## append the line "export PERM_DENY_UNTIL_ALLOWED=yes" to file file_name, after the line that reads "# upgrade to new filter version"
