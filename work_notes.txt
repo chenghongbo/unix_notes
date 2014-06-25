@@ -90,3 +90,9 @@
 
 [ GCC ] -I/header/files/path -L/library/file/path
 ## how to include extra head file and library search path 
+
+[ Linux ] parted /dev/sda print
+## list UEFI partitions on /dev/sda
+
+[ Linux ] btrfs filesystem show /dev/sda2
+## display btrfs filesystem information on /dev/sda2
