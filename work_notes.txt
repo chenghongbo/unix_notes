@@ -96,3 +96,5 @@
 
 [ Linux ] btrfs filesystem show /dev/sda2
 ## display btrfs filesystem information on /dev/sda2
+
+[ mutt ] use $ to save changes after email deletion using "d"
