@@ -96,3 +96,6 @@
 
 [ Linux ] btrfs filesystem show /dev/sda2
 ## display btrfs filesystem information on /dev/sda2
+
+[ VIM ] :%s/^\w*//
+## remove the first column of the entire document
