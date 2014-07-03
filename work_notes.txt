@@ -101,3 +101,6 @@
 ## remove the first column of the entire document
 
 [ mutt ] use $ to save changes after email deletion using "d"
+
+[ SED ] sed -i s/pattern/replacement/2 $file
+## replace every 2nd occurance of "pattern" with "replacment" on $file
