@@ -104,3 +104,6 @@
 
 [ SED ] sed -i s/pattern/replacement/2 $file
 ## replace every 2nd occurance of "pattern" with "replacment" on $file
+
+[ OpenBSD ] mixerctl outputs.master.volume=140,140
+## set audio volume to 140% (both left and right track)
