@@ -105,5 +105,11 @@
 [ SED ] sed -i s/pattern/replacement/2 $file
 ## replace every 2nd occurance of "pattern" with "replacment" on $file
 
-[ OpenBSD ] mixerctl outputs.master.volume=140,140
-## set audio volume to 140% (both left and right track)
+[ OpenBSD ] mixerctl outputs.master=140,140
+## set audio volume to 140 with max 255 (both left and right track)
+
+[ OpenBSD ] mixerctl outputs.master.mute=on
+## mute sound
+
+[ OpenBSD ] xrandr -s 1280x1024
+## change resolution on command line, provided your video card support it
