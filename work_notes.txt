@@ -113,3 +113,13 @@
 
 [ OpenBSD ] xrandr -s 1280x1024
 ## change resolution on command line, provided your video card support it
+
+[ SmartOS ] vmadm create -f guest.json
+## create a kvm guest using pre-defined json file guest.json
+
+[ SmartOS ]  vmadm start 3b202a79-f148-4c87-bb7f-ff9d64f724ca \
+              order=cd,once=d cdrom=/ubuntu-12.04-server-amd64.iso,ide
+## boot guest with ID 3b202... using an iso file  named ubuntu-12.04...iso
+
+[ SmartOS ]  vmadm info 9fc73e38-0329-4c99-beeb-beca4191756b vnc
+## view vnc connection info about guest 9fc...
