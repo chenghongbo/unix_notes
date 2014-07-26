@@ -130,3 +130,26 @@
 [ AWK ] awk /start of text/,/END OF TEXT/ $file
 ## print lines in file $file between line that matches /start of text/ 
 ## and line that matches /END OF TEXT/
+
+Solaris 11 network configuration
+
+[ Solaris ] netadm list [ -x ]
+## list network configuration profiles (NCP), "online" status means active
+
+[ Solaris ] netadm enable -p ncp NCP_NAME
+## activiate profile 
+
+[ Solaris ] ipadm set-prop -p forwarding=on ipv4
+## enable IPv4 packet forwarding
+
+[ Solaris ] dladm show-link
+## show NIC status
+
+[ Solaris ] ipadm show-addr
+## show IP addresses configured on the system
+
+[ Solaris ] How to assign (static) IP to a NIC
+# ipadm create-ip net1
+# ipadm create-addr -a 10.0.5.10/24 net1
+# ipadm show-addr
+
