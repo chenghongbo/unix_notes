@@ -131,8 +131,6 @@
 ## print lines in file $file between line that matches /start of text/ 
 ## and line that matches /END OF TEXT/
 
-Solaris 11 network configuration
-
 [ Solaris ] netadm list [ -x ]
 ## list network configuration profiles (NCP), "online" status means active
 
