@@ -154,3 +154,8 @@
 # ipadm create-addr -a 10.0.5.10/24 net1
 # ipadm show-addr
 
+[ AWK ] awk 'FNR==NR{a[$1];next};!($1 in a)' part.txt all.txt > rest.txt
+# compare the first field in file part.txt and all.txt, if that field appear in part.txt
+# then remove the corresponding line in all.txt, and put result in file rest.txt
+# or, put it another way, this command removes lines in all.txt whose first field appear 
+# in file part.txt, put the result into file rest.txt
