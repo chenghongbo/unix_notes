@@ -127,6 +127,9 @@
 [ SmartOS ] vmadm update 932532d9-db51-4241-abcb-a824575a88bd quota=25
 ## update vm guest disk quota (to be verified)
 
-[ AWK ] awk /start of text/,/END OF TEXT/ $file
+[ SED ] sed -n '/start of text/,/END OF TEXT/p' $file
 ## print lines in file $file between line that matches /start of text/ 
 ## and line that matches /END OF TEXT/
+
+[ SED ] sed -n '32,67p' $file
+## print lines from 32 to 67 in file $file
