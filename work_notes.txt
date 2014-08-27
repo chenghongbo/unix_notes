@@ -160,4 +160,13 @@
 # or, put it another way, this command removes lines in all.txt whose first field appear 
 # in file part.txt, put the result into file rest.txt
 
-sed -n 'N;/\.\n\-/p;D' remote.check.txt
+[ SED ] sed -n 'N;/\.\n\-/p;D' remote.check.txt
+# multiple line pattern match -- search for a line that ends with "." 
+# the line follows start with "-"
+
+[ VIRTUALBOX ] vboxmanage modifyvm "OpenBSD5.5" --accelerate3d off
+# turn off 3D acceleration for VM named "OpenBSD5.5"
+
+[ VIRTUALBOX ] vboxmanage startvm "OpenBSD5.5" -type headless
+# start VM named "OpenBSD5.5" from command line
+
