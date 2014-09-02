@@ -147,7 +147,7 @@
 ## show NIC status
 
 [ Solaris ] ipadm show-addr
-## show IP addresses configured on the system
+# show IP addresses configured on the system
 
 [ Solaris ] How to assign (static) IP to a NIC
 # ipadm create-ip net1
@@ -170,3 +170,5 @@
 [ VIRTUALBOX ] vboxmanage startvm "OpenBSD5.5" -type headless
 # start VM named "OpenBSD5.5" from command line
 
+[ GIT ] git rm --cached $file 
+# To stop tracking a file that is currently tracked 
