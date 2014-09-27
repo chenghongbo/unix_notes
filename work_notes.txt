@@ -172,3 +172,7 @@
 
 [ GIT ] git rm --cached $file 
 # To stop tracking a file that is currently tracked 
+
+[ GIT ] git config http.sslVerify "false"
+## to NOT verify ssl cert
+## env GIT_SSL_NO_VERIFY=true git command for one-off operation
