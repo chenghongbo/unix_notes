@@ -176,3 +176,7 @@
 [ GIT ] git config http.sslVerify "false"
 ## to NOT verify ssl cert
 ## env GIT_SSL_NO_VERIFY=true git command for one-off operation
+
+[ AWK ] awk '($1 ~ /ln|ny/) && ($4 ~ /\ydefl\y/)' exchanges.fx
+## \y works as word boundries here
+## print line if first field starts with ln or ny, and 4th field is defl
