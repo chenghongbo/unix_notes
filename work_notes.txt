@@ -180,3 +180,12 @@
 [ AWK ] awk '($1 ~ /ln|ny/) && ($4 ~ /\ydefl\y/)' exchanges.fx
 ## \y works as word boundries here
 ## print line if first field starts with ln or ny, and 4th field is defl
+
+[ AWK ] awk '$4 ~ /\y(mi|s|pr|mc|ls|as|at|br|co|de|he|i|l|ol|pr|pa|st|vi|vx)\y/ {print FILENAME,":", $0}' *
+## search for word in 4th field of all files, print filename and line, if found
+
+[ KSH ] r $digit 
+## run previous command numbered $digit, or a single r to run previous command
+
+[ KSH ] r string
+## Run most recent command starting with characters in string
