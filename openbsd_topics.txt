@@ -1,0 +1,23 @@
+## this is for personal use only
+## used to keep note for some topics that I'd like to cover in future video recordings 
+## for my website (www.kdump.org)
+
+-- KSH shell 
+
+-- IRC client issri
+
+-- getops usage in scripting
+
+-- how pipeline works
+
+-- OpenBSD HTTPD basic configurations
+
+-- resume OpenSMTPD topics
+
+-- move OpenBSD from one disk to another
+
+-- my fluxbox configs
+
+-- conky for graphics
+
+-- xombrero basics
