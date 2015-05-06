@@ -21,3 +21,9 @@
 -- conky for graphics
 
 -- xombrero basics
+
+-- awk
+
+-- sed usage
+
+--scrot -> taking screenshot 
