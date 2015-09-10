@@ -63,4 +63,65 @@
 
     cargo build用于编译
     cargo run用于编译并运行
-5. 
+
+5.  单行注释 //
+    多行注释 /* */
+    文档注释 ///
+
+6. 变量的定义、类型和引用
+
+    原生类型有：
+    
+    布尔型
+        let x: bool = true;
+        let y: bool = false;
+
+    数字型(有细分)
+        i8
+        i16
+        i32
+        i64
+        u8
+        u16
+        u32
+        u64
+        isize
+        usize
+        f32
+        f64
+        // 其中，i代表有符号,u代表无符号，f代表浮点数。后面的数字（8，16，32，64）表示数字的位宽。
+        // i8表示一个8位有符号的数字，u16表示一个16位无符号数字。
+
+        //当需要表示位宽不确定的数字时，使用isize或usize
+
+    字符型
+        char
+           //表示单个的unicode字符 , 使用单引号定义
+            let x: char  'C';
+
+    数组
+        //定义数组的格式 名称: [元素类型; 个数] = [元素1;元素2;...]
+        let a: [i32; 3]  = [1,2,3];
+        let names = ["Graydon", "Brian", "Niko"]; // names: [&str; 3]
+
+        //a.len()用于取得元素个数，索引从0开始
+
+
+    分片（slice）
+        //用于获取、查看另外一个数据类型的部分或全部
+
+        let a = [0, 1, 2, 3, 4];
+        let middle = &a[1..4]; // A slice of a: just the elements 1, 2, and 3
+        let complete = &a[..]; // A slice containing all of the elements in a
+
+    字符串(str)
+
+        let s = "Hello, world.";
+
+        //Rust官方说str类型本身并不是很有用，它的用法需要再深入学习
+        //摘抄原描述如下：
+        //Rust's string type, str, is a sequence of Unicode scalar values encoded as a stream of
+        //UTF-8 bytes. All strings are guaranteed to be validly encoded UTF-8 sequences.
+        //Additionally, strings are not null-terminated and can thus contain null bytes.
+        //
+        //The actual representation of strs have direct mappings to slices: &str is the same as &[u8].
