@@ -70,6 +70,18 @@
 
 6. 变量的定义、类型和引用
 
+    // 变量的定义格式为： let name: type = value;
+    // type 可以省略，由rust自己推导
+    //
+    // 变量默认是不可更改的，如需某个变量需要中途变更值，需要在名称前加上mut关键字
+    // 如：
+    //
+    // let mut x = 10;
+    //
+    // 还有全局常量,用static关键字定义，全部大写字母
+    //
+    static MAX_LINE: i32 = 1000;
+
     原生类型有：
     
     布尔型
@@ -125,3 +137,34 @@
         //Additionally, strings are not null-terminated and can thus contain null bytes.
         //
         //The actual representation of strs have direct mappings to slices: &str is the same as &[u8].
+        //
+    Tuples
+        // 固定大小的有序列表，使用小括号定义()
+        //
+        let x: (i32, &str) = (1, "hello");
+        // or let x = (1, "hello");
+
+        let tuple = (1, 2, 3);
+
+        let x = tuple.0;
+        let y = tuple.1;
+        let z = tuple.2;
+
+        println!("x is {}", x);
+
+    函数
+        //函数也是一种类型
+        // -> 用于指定返回类型
+        // 函数的参数及返回值一定要指定类型
+        //
+        // 注意，这里的x后面没有分号，否则会出错
+        fn foo(x: i32) -> i32 { x }
+        
+        //这是一个接受两个整数的函数，没有返回值
+        //此函数不返回值(?)
+        fn print_sum(x: i32, y: i32) {
+                println!("sum is: {}", x + y);
+        }
+
+        //这里x是一个函数指针，指向一个接受i32类型数字并返回i32数字的函数
+        let x: fn(i32) -> i32 = foo;
