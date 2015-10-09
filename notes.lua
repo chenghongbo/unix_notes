@@ -198,3 +198,32 @@ function add (...)
 	return s
 end
 print(add(3, 4, 10, 25, 12))
+
+
+--[[ 
+Functions in Lua are first-class values with proper lexical scoping.
+What does it mean for functions to be “first-class values”? It means that,
+in Lua, a function is a value with the same rights as conventional values like
+numbers and strings. We can store functions in variables (both global and local)
+and in tables, we can pass functions as arguments to and return them from other
+functions.
+What does it mean for functions to have “lexical scoping”? It means that
+functions can access variables of their enclosing functions. 1 As we will see
+in this chapter, this apparently innocuous property brings great power to the
+language, because it allows us to apply in Lua many powerful programming
+techniques from the functional-language world. Even if you have no interest at
+all in functional programming, it is worth learning a little about how to explore
+these techniques, because they can make your programs smaller and simpler.
+A somewhat confusing notion in Lua is that functions, like all other values,
+are anonymous; they do not have names. When we talk about a function
+name, such as print , we are actually talking about a variable that holds that
+function. Like any other variable holding any other value, we can manipulate
+such variables in many ways. The following example, although a little silly,
+shows the point:
+ ]]
+ a = {p = print}
+ a.p("Hello World") --> Hello World
+ print = math.sin ---- 'print' now refers to the sine function
+ a.p(print(1)) ----> 0.841470
+ sin = a.p ---- 'sin' now refers to the print function
+ sin(10, 20) ----> 10 20
