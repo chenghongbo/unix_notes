@@ -1,0 +1,279 @@
+Oracle Solaris ZFS
+
+传统的文件系统基于磁盘来创建。ZFS文件系统则建立在存储池(storeage pool或zfs pool)的基础上。存储池是一个或多个物理磁盘组成的一个集合。ZFS这样做的好处在于，当存储池里的磁盘空间用完的时候，你可以直接添加新的磁盘而无需重建文件系统，原来的ZFS文件系统可以自动利用新增的磁盘上的空间。
+
+
+创建一个名为tank的镜像存储池，使用的磁盘为c1t0d0和c2t0d0：
+
+
+	# zpool create tank mirror c1t0d0 c2t0d0
+
+创建了存储池后，无需手工创建文件系统和挂载，ZFS会自动创建并将文件系统挂载到/tank(存储池名称)上。当然也可以使用-m参数指定挂载点名称。
+
+要查看新建的存储池，使用：
+
+	# zpool list
+
+
+使用两块磁盘（大小均为16G，Virtualbox下的虚拟测试磁盘）建立一个名为testpool的存储池，并挂载到/data目录下。
+
+root@sunflower:~# zpool create -m /data testpool  c2t0d0 c3t0d0
+'testpool' successfully created, but with no redundancy; failure of one
+device will cause loss of the pool
+
+root@sunflower:~# zpool list
+NAME       SIZE  ALLOC   FREE  CAP  DEDUP  HEALTH  ALTROOT
+rpool     15.6G  4.98G  10.6G  31%  1.00x  ONLINE  -
+testpool  31.8G   100K  31.7G   0%  1.00x  ONLINE  -
+
+
+root@sunflower:~# df -h /data
+Filesystem             Size   Used  Available Capacity  Mounted on
+testpool                31G    31K        31G     1%    /data
+
+
+创建了存储池后，系统会自动创建文件系统及挂载点。我们还可以在此存储池下再创建其它的文件系统，并设置不同的挂载点及属性。
+
+以上文创建的名为tank的存储池为例：
+
+# zfs create tank/home
+# zfs set mountpoint=/export/zfs tank/home
+# zfs set share.nfs=on tank/home
+# zfs set compression=on tank/home
+# zfs get compression tank/home
+
+
+当然也可以在创建时一并指定这些属性：
+
+# zfs create -o mountpoint=/export/zfs -o share.nfs=on -o compression=on tank/home
+
+
+
+===  storage pool ===
+
+The most basic element of a storage pool is physical storage. Physical storage can be any block
+device of at least 128 MB in size. Typically, this device is a hard drive that is visible to the
+system in the /dev/dsk directory.
+
+A storage device can be a whole disk (c1t0d0) or an individual slice (c0t0d0s7).
+
+ZFS formats the disk using an EFI label to contain a single, large slice.
+
+
+Using whole physical disks is the easiest way to create ZFS storage pools. ZFS
+configurations become progressively more complex, from management, reliability, and
+performance perspectives, when you build pools from disk slices, LUNs in hardware
+RAID arrays, or volumes presented by software-based volume managers.
+
+
+The following command creates a new pool named tank that consists of the disks c1t0d0 and
+c1t1d0:
+
+# zpool create tank c1t0d0 c1t1d0
+
+Device names representing the whole disks are found in the /dev/dsk directory and are labeled
+appropriately by ZFS to contain a single, large slice. Data is dynamically striped across both
+disks.
+
+Creating a Mirrored Storage Pool
+
+To create a mirrored pool, use the mirror keyword, followed by any number of storage devices
+that will comprise the mirror. Multiple mirrors can be specified by repeating the mirror
+keyword on the command line. The following command creates a pool with two, two-way
+mirrors:
+
+# zpool create tank mirror c1d0 c2d0 mirror c3d0 c4d0
+
+The second mirror keyword indicates that a new top-level virtual device is being specified.
+Data is dynamically striped across both mirrors, with data being redundant between each disk
+appropriately.
+
+Cache devices provide an additional layer of caching between main memory and disk. Using
+cache devices provides the greatest performance improvement for random-read workloads of
+mostly static content.
+
+You can create a storage pool with cache devices to cache storage pool data. For example:
+
+# zpool create tank mirror c2t0d0 c2t1d0 c2t3d0 cache c2t5d0 c2t8d0
+
+# zpool status tank
+pool: tank
+state: ONLINE
+scrub: none requested
+
+
+Cautions For Creating Storage Pools
+Review the following cautions when creating and managing ZFS storage pools.
+
+
+Do not repartition or relabel disks that are part of an existing storage pool. If you attempt
+to repartition or relabel a root pool disk, you might have to reinstall the OS.
+
+Do not create a storage pool that contains components from another storage pool, such
+files or volumes. Deadlocks can occur in this unsupported configuration.
+
+
+A pool created with a single slice or single disk has no redundancy and is at risk for data
+loss. A pool created with multiple slices but no redundancy is also at risk for data loss. A
+pool created with multiple slices across disks is harder to manage than a pool created with
+whole disks.
+
+
+A pool that is not created with ZFS redundancy (RAID-Z or mirror) can only report data
+inconsistencies. It cannot repair data inconsistencies.
+
+Although a pool that is created with ZFS redundancy can help reduce down time due to
+hardware failures, it is not immune to hardware failures, power failures, or disconnected
+cables. Make sure you backup your data on a regular basis. Performing routine backups of
+pool data on non-enterprise grade hardware is important.
+
+A pool cannot be shared across systems. ZFS is not a cluster file system.
+
+====================
+Pools are destroyed by using the zpool destroy command. This command destroys the pool
+even if it contains mounted datasets.
+
+# zpool destroy tank
+
+You can dynamically add disk space to a pool by adding a new top-level virtual device. This
+disk space is immediately available to all datasets in the pool. To add a new virtual device to a
+pool, use the zpool add command. For example:
+
+# zpool add zeepool mirror c2t1d0 c2t2d0
+
+# zpool create tank c0t1d0
+# zpool attach tank c0t1d0 c1t1d0   --> created a mirror
+# zpool add  tank c0t1d0 c1t1d0       ---> still stripped
+
+
+You can use the zpool detach command to detach a device from a mirrored storage pool. For
+example:
+
+# zpool detach zeepool c2t1d0
+
+By default, a zpool split operation on a mirrored pool detaches the last disk for the newly
+created pool. After the split operation, you then import the new pool.
+
+
+# zpool status tank
+# zpool split tank tank2
+# zpool import tank2
+
+
+You can identify which disk should be used for the newly created pool by specifying it with the
+zpool split command. For example:
+# zpool split tank tank2 c1t0d0
+
+# zpool split -R /tank2 tank tank2
+
+Onlining and Offlining Devices in a Storage Pool
+
+ZFS allows individual devices to be taken offline or brought online. When hardware is
+unreliable or not functioning properly, ZFS continues to read data from or write data to the
+device, assuming the condition is only temporary. If the condition is not temporary, you can
+instruct ZFS to ignore the device by taking it offline. ZFS does not send any requests to an
+offline device.
+
+Note - Devices do not need to be taken offline in order to replace them.
+
+# zpool offline tank c0t5000C500335F95E3d0
+
+
+If a device is taken offline due to a failure that causes errors to be listed in the zpool status
+output, you can clear the error counts with the zpool clear command. If a device within a pool
+is loses connectivity and then connectivity is restored, you will need to clear these errors as
+well.
+
+If specified with no arguments, this command clears all device errors within the pool. For
+example:
+
+# zpool clear tank
+
+If one or more devices are specified, this command only clears errors associated with the
+specified devices. For example:
+
+# zpool clear tank c0t5000C500335F95E3d0
+
+You can replace a device in a storage pool by using the zpool replace command.
+If you are physically replacing a device with another device in the same location in a redundant
+pool, then you might only need to identify the replaced device. On some hardware, ZFS
+recognizes that the device is a different disk in the same location. For example, to replace
+a failed disk (c1t1d0) by removing the disk and replacing it in the same location, use the
+following syntax:
+
+# zpool replace tank c1t1d0
+
+If you are replacing a device in a storage pool with a disk in a different physical location, you
+must specify both devices. For example:
+
+# zpool replace tank c1t1d0 c1t2d0
+
+If you are replacing a disk in the ZFS root pool, see “How to Replace a Disk in a ZFS Root Pool
+(SPARC or x86/VTOC)” on page 106.
+
+The following are the basic steps for replacing a disk:
+1. Offline the disk, if necessary, with the zpool offline command.
+2. Remove the disk to be replaced.
+3. Insert the replacement disk.
+4. Review the format output to determine if the replacement disk is visible.
+In addition, check to see whether the device ID has changed. If the replacement disk has a
+WWN, then the device ID for the failed disk is changed.
+5. Let ZFS know the disk is replaced. For example:
+# zpool replace tank c1t1d0
+If the replacement disk has a different device ID as identified above, include the new device
+ID.
+
+# zpool replace tank c0t5000C500335FC3E7d0 c0t5000C500335BA8C3d0
+
+6. Bring the disk online with the zpool online command, if necessary.
+7. Notify FMA that the device is replaced.
+From fmadm faulty output, identify the zfs://pool=name/vdev=guid string in the
+Affects: section and provide that string as an argument to the fmadm repaired command.
+
+# fmadm faulty
+# fmadm repaired zfs://pool=name/vdev=guid
+
+
+zpool create zeepool mirror c0t5000C500335F95E3d0 c0t5000C500335F907Fd0
+mirror c0t5000C500335BD117d0 c0t5000C500335DC60Fd0 spare c0t5000C500335E106Bd0
+c0t5000C500335FC3E7d0
+
+
+
+
+zpool remove zeepool c0t5000C500335FC3E7d0
+
+A hot spare cannot be removed if it is currently used by a storage pool.
+
+== Currently, the zpool remove command can only be used to remove hot spares, cache
+devices, and log devices.
+
+== To add a disk as a hot spare, the hot spare must be equal to or larger than the size of the
+largest disk in the pool. 
+
+Adding a smaller disk as a spare to a pool is allowed. However,
+when the smaller spare disk is activated, either automatically or with the zpool replace
+command, the operation fails with an error similar to the following:
+
+cannot replace disk3 with disk4: device is too small
+
+== You cannot share a spare across systems.
+
+You cannot configure multiple systems to share a spare even if the disk is visible for access
+by these systems. If a disk is configured to be shared among several pools, only a single
+system must control all of these pools.
+
+
+== Consider that if you share a spare between two data pools on the same system, you must
+coordinate the use of the spare between the two pools. For example, pool A has the spare
+in use and pool A s exported. Pool B could unknowingly use the spare while pool A is
+exported. When pool A is imported, data corruption could occur because both pools are
+using the same disk. Therefore, be aware of such edge cases where even though a disk is a
+shared spare for several pools, conditions might exist that would trigger problems for the
+pools.
+
+== Do not share a spare between a root pool and a data pool.
+
+
+
+

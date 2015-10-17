@@ -1,0 +1,135 @@
+Solaris 11 network management
+
+
+1. 要确定网络管理模式 (fixed or automatic), 使用下面的命令：
+
+	netadm list -x 
+
+	如果网络管理为固定模式，netadm会给出以下信息：
+
+
+	netadm: DefaultFixed NCP is enabled; automatic network management is not available.
+	’netadm list’ is only supported when automatic network management is active.
+
+	否则，它会列出当前活动的网络配置资料（NCP）：
+
+	# netadm list -x
+	TYPE		PROFILE		STATE		AUXILIARY STATE
+	ncp		Automatic	online		active
+	......
+
+2. ipadm 和 dladm命令只能用于固定网络管理模式(DefaultFixed)，netcfg命令只能用于自动网络管理模式
+
+3. 启用固定网络管理模式：
+
+	# netadm enable -p ncp defaultfixed
+
+4. dladm命令常用功能：
+
+	■ dladm rename-link changes the name of a datalink.
+	■ dladm show-link displays existing datalinks in the system.
+	■ dladm show-phys displays physical attributes of datalinks.
+	■ dladm delete-phys deletes a datalink.
+	■ dladm show-linkprop displays the properties that are associated with the datalink.
+	■ dladm set-linkprop sets specified datalink properties.
+	■ dladm reset-linkprop restores properties to their default settings.
+	■ dladm show-ether displays Ethernet parameter settings of a datalink
+
+5. 使用dladm重命名一个网卡
+
+
+	a. 查看当前网卡名称
+
+	LINK	MEDIA		STATE	SPEED	DUPLEX	DEVICE
+	net0 	Ethernet 	up	1000	full	e1000g0
+	net1 	Ethernet 	up	1000	full	nge0
+
+
+	b. 如果要重命名的网卡已经配置了IP地址，需要先删除：
+
+	# ipadm delete-ip net0
+	c. 重命名网卡：
+	# dladm rename-link net0 oldnet0
+	# dladm rename-link net1 net0
+	
+	d.查看重命名后的网卡名称：
+	
+	# dladm show-phys
+
+	LINK		MEDIA		STATE	SPEED	DUPLEX	DEVICE
+	oldnet0 	Ethernet 	up	1000	full	e1000g0
+	net0 		Ethernet 	up	1000	full	nge0
+
+
+6. 查看网卡MAC地址：
+	
+	dladm show-linkprop -p mac-address
+
+
+7. 给网卡配置IP地址
+
+
+
+
+dladm show-phys  #查看物理网卡
+dladm show-link  #查看数据链路及其对应网卡
+ipadm show-if    #查看当前已经配置的接口（和物理网卡不是一个概念，这个是协议层的接口，如IP层的接口）
+ipadm create-ip $interface  #如果要配置的网卡没有对应的IP层接口，则需要先创建一个，否则是无法为网卡配置IP地址的
+
+最后配置IP地址：
+# ipadm create-addr -T address-type -a address/prefixlen addrobj
+
+
+其中：
+
+address-type: 
+Specifies the type of IP address that is assigned to the interface, which is one
+of the following: static, dhcp, or addrconf. Addrconf refers to
+automatically generated IPv6 addresses.
+
+
+address:
+Specifies the IP address to configure on the interface. You can specify either
+just a local address, or both a local address and a remote address in the case
+of tunnel configuration. Typically, you assign only a local address. In this
+case, you specify the address directly with the -a option, such as: -a address.
+The address is automatically considered a local address.
+
+
+interface 
+refers to the IP interface to which the address is assigned. The
+interface variable must reflect the name of the datalink on which the IP
+interface is configured.
+
+addrobj
+Specifies an identifier for the unique IP address or set of addresses that is
+used in the system. The addresses can be either IPv4 or IPv6 types. The
+identifier uses the format interface/user_specified_string.
+
+查看接口：
+# ipadm show-if [interface]
+
+查看地址：
+# ipadm show-addr [addrobj]
+
+
+ipadm show-* [other-arguments] [interface]
+■ To obtain interface information, use ipadm show-if.
+■ To obtain address information, use ipadm show-addr.
+■ To obtain information about a specific interface property, use ipadm show-ifprop.
+■ To obtain information about a specific address property, use ipadm show-addrprop
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
