@@ -1,6 +1,6 @@
 ## this is for personal use only
 ## used to keep note for some topics that I'd like to cover in future video recordings 
-## for my website (www.kdump.org)
+## for my website (ivy.keda.io)
 
 -- KSH shell 
 
