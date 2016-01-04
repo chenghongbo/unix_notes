@@ -189,3 +189,6 @@
 
 [ KSH ] r string
 ## Run most recent command starting with characters in string
+
+[ Arch ] pacman -Syy && pacman -Su
+## to update the package database then the packages themselves (as apt-get update && apt-get upgrade in debian/ubuntu)
