@@ -203,15 +203,38 @@ DBGMSG(CHAR_S)
 		*/
 		
 		/*
+		 * Instruction movsb is a string movement operation, 
+		 * It is to Move byte at address DS:(E)SI to address ES:(E)DI
+		 * So is movsw, movsd, but 2 bytes/ 4 bytes at a time, instead of one byte
+	
+		 * mov instruction cannot be used to move data from one MEMORY location
+		 * to another MEMORY location. That is what the movs instruction is for.
+
 		movsb指令执行时，ds:si 指向源地址 es:di指向目的地址
 		cld 指令的作用是设置flag寄存器DF位为0，这样每次重复指令完成时di si均+1，否则-1
 		rep 重复执行指定指令，直至%cx 或 %ecx寄存器的值为0 （每次重复完成%cx值减1）
 		*/
+	
 movw $BOOTRELOCSEG, %ax
+	/* you cannot move a immediate number to a segment register (such as es/ds/cs/ss etc.)
+	   so you have to move that number to a general purpose register, then from that general
+	   purpose register to a segment register.
+
+	   %ax is now 0x7a0, then es will be set to this value.
+
+	   %ds has been set to 0x7c0
+	 */
 movw %ax, %es
 xorw %si, %si
 xorw %di, %di
-movw $0x200, %cx /* Bytes in MBR, relocate it all */
+
+	/*  before the movsb instruction starts, 
+	    source address is:      ds:si  0x7c0:0000
+	    destination address is: es:si  0x7a0:0000
+	
+
+	 */
+movw $0x200, %cx /* Bytes in MBR, relocate it all  0x200H = 512 D*/
 cld
 rep
 movsb
