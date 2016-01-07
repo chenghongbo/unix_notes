@@ -231,21 +231,29 @@ xorw %di, %di
 	/*  before the movsb instruction starts, 
 	    source address is:      ds:si  0x7c0:0000
 	    destination address is: es:si  0x7a0:0000
+	    so the space between source and destination is 0x7c00 - 0x7a00 = 0x200
 	
+	 -- REMINDER: 
+		In real mode, the registers are only 16 bits, so you can only address up to 64k.
+		In order to allow addressing of more memory, addresses are calculated from 
+		segment * 16 + offset.
 
 	 */
-movw $0x200, %cx /* Bytes in MBR, relocate it all  0x200H = 512 D*/
+movw $0x200, %cx /* Bytes in MBR, relocate it all. %cx holds the number to repeat, which is 0x200H = 512 D*/
 cld
 rep
 movsb
 
 		/* Jump to relocated self */
 ljmp $BOOTRELOCSEG, $reloc
-
+		
 		/* MBR已经将把自己挪到了0x07A00 -> 0x07BFF， 把0x07C00 -> 0x07DFF的内存地址腾出来了。
 		 * 接下来要把PBR（biosboot)加载到0x07C00 -> 0x07DFF地址去。
 		 * 要想加载PBR，先要找到磁盘，然后找到磁盘上的活动分区，然后将此分区的第一个扇区（即PBR）的内容
 		 * 加载上去
+		  
+		 %cs is now 0x7a0
+
 		 */
 
 reloc:
@@ -253,16 +261,16 @@ DBGMSG(CHAR_R)
 
 		/* Set up %es and %ds */
 pushw %ds
-popw %es 		/* next boot is at the same place as we were loaded */
+popw %es 		/* %ds,%es is now 0x7c0, next boot is at the same place as we were loaded */
 pushw %cs
-popw %ds 		/* and %ds is at the %cs */
+popw %ds 		/* and %ds is at the %cs, 0x7a0 */
 
 #ifdef SERIAL
 		/* Initialize the serial port to 9600 baud, 8N1.*/
 xorw %ax, %ax
-movb $0xe3, %ax
-movw $SERIAL, %dx
-int $0x14
+movb $0xe3, %ax /* ah = 00h, %al holds the parameters for serial communication */
+movw $SERIAL, %dx /* %dx holds the port number for serial communication */
+int $0x14 /* interrupt 14 is for serial port communication */
 #endif
 
 		/*
@@ -657,3 +665,7 @@ pt:
 signature:
 .short DOSMBR_SIGNATURE
 . = 0x200
+
+/* http://csiflabs.cs.ucdavis.edu/~ssdavis/50/att-syntax.htm
+
+*/
