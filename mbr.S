@@ -292,9 +292,15 @@ jz no_shift
 putc(CHAR_SHIFT_SEEN) /* Signal that shift key was seen */
 
 orb $MBR_FLAGS_FORCE_CHS, flags
+		/* 
+			#define MBR_FLAGS_FORCE_CHS 0x0001	
+			flags is a label (see bottom, around line 670).
+			Here flags should be a memory address, why do a logical or here, after SHIFT key is pressed (or CHS reading),
+			 where should the result be put?  the 2nd operand (flags)? really?
+		*/
 
 no_shift:
-		/* BIOS passes us drive number in %dl
+		/* BIOS passes us drive number in %dl -- this is done before the whole MBR load ....
 		*
 		* XXX - This is not always true. We currently check if %dl
 		* points to a HD, and if not we complain, and set it to point
@@ -323,7 +329,7 @@ drive_ok:
 		* Note: this should be the only active partition. We currently
 		* don't check for that.
 		*/
-movw $pt, %si
+movw $pt, %si /* copy address of label pt to %si register */
 
 movw $NDOSPART, %cx
 
