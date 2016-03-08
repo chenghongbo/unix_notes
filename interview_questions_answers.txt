@@ -1,18 +1,44 @@
+Reason for Leaving Morgan:
+		There was no single factor that made me to leave, it was many things came together and they left little room for possible workaround. Some of the major issues were work-life balance and the fact that more than 60% of time and energy were spent on process compliance, instead of the work itself. They have strong reason to do so as a financial company where any errors/mistakes leads to direct loss of money and reputation, unfortunately, I found myself having some hard time adjusting to this style.
+
+Reason for leaving Bleum:
+
+			I had some hard time fitting into the corporate culture. For example, I need to record detailed time log on a daily basis. And I had to make sure my team members did it too. I felt sorry when I had to get them back to office because they forgot to do so, even after they already worked overtime.
+ 
 Goals in 3/5 years?
 	Improve scripting skills, following the trend from sysadmin/operation support to devops
 	in-depth knowledge on storage/file systems, virtulization technology, to become a better system engineer
 
 
+Career Achievements
+	I'm proud of the work I did in Bleum as a team lead. 
+	
+	The things I did includes:
+		going onsite to our client to get orientated with the unix infrastructure we were going to support, and also see what type of tasks could be out-sourced. 
+		Getting the unix support team up and running, include hiring team members, knowledge transfer, team management, task assignments.
+		Our client was happy with the result, and I was entrusted with a new task of setting up a senior unix engineer team to work on some of the more challenging tasks.
 
+Challenges:
+		Had to let someone go in Bleum, as constant complaints were being received from clients, and no signs of change were observed after serveral one-on-one sessions
 
+Weakness:
+		I found myself easy to get distracted by  new technology/stuff
+		
+		solution:
+				write down a plan for important tasks
+				cut down on time spent on the internet
+		
+Projects to mention:
 
+		File server/Share folder migration from Windows to Linux (Redhat 4), in BenQ
+		Squid cache hit imporvement, in eBay
+		Windows server patching, in eBay
+		New office build up, in eBay
 
-
-
-
-
-
-
+Websites frequently visited:
+	lwn.net 
+	reddit.com
+	https://news.ycombinator.com/
 
 
 Questions I can ask:
