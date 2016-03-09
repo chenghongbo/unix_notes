@@ -1,0 +1,109 @@
+Features provided by systemd:
+
+•  Parallelization capabilities, which increase the boot speed of a  system. 
+•  On-demand starting of daemons without requiring a  separate service. 
+•  Automatic service dependency management prevents  long  timeouts, such as not starting a network service when the network  is  not available. 
+•  A method of tracking related processes together using Linux control  groups. 
+
+
+
+ 
+[root@serverx  -]#  systemctl  status  sshd.service 
+'  sshd.service  - OpenSSH  server  daemon 
+	Loaded :  loaded  (/usr/lib/systemd/system/sshd.service;  enabled ) 
+	Active :  active  (running )  since  Thu  2014-02-27  11:51:39  EST;  7h  ago 
+	Main  PID : 1073 (sshd ) 
+	CG group : /system.slice/sshd.service 
+			   L. 1073  /usr/sbin/sshd  -D 
+Feb  27  11 :51:39  server0.example.com  systemd [1] :  Started  OpenSSH  se rver  daemon . 
+Feb  27  11 :51:39  server0.example.com  sshd [1073] :  Could  not  load  host  key :  /et  ...  y 
+Feb  27  11 :51:39  server0.example.com  sshd [1073] :  Server  lis tening  on  0.0.0.0  ...  . 
+Feb  27  11 :51:39  server0.example.com  sshd [1073] :  Server  listening  on  ::  port  22 . 
+Feb  27  11 :53:21  server0.example.com  sshd [1270] :  error:  Could  not  load  host  k ...  y 
+Feb  27  11 :53:22  server0.example.com  sshd [1270] :  Accepted  pas swo rd  for root  f ...  2 
+Hint :  Some  lines  were  ellipsized ,  use  -1  to  show in  full . 
+
+-------------------------------------------------------------------------------------------------
+Keyword:  			|	Description: 
+-------------------------------------------------------------------------------------------------
+loaded  			|	Unit  conf iguration file has been processed. 
+active (running)  	|	Running with one or more  continuing processes. 
+active (exited)  	|	Successfully completed a  one-time configuration. 
+active (waiting)  	|	Running but waiting for an event. 
+inactive  			|	Not  running. 
+enabled  			|	Will be started at boot time. 
+disabled  			|	Will not be started at boot time. 
+static  			|	Can not be enabled, but may be started by an enabled unit automatically. 
+-------------------------------------------------------------------------------------------------
+
+
+Query  the state of  all units to verify a  system startup. 
+  [root@serverx  -]#  systemctl 
+
+Query the state of only the service units. 
+[ root@serverx  - ]#  systemctl -type=service 
+
+Investigate any units which are  in a  failed or maintenance  state. Optionally,  add the  -1  option to show the full output. 
+ [root@serverX  -]#  systemctl  status  rngd.service  -1 
+
+The status argument may also be  used to  determine if a  particular unit is  active and show  if 
+the unit  is enabled to start at boot time. Alternate commands can also easily show the active and enabled  states: 
+
+[root@serverx  -]#  systemctl  is-enabled  sshd
+[root@serverx  -]#  systemctl  is-active  sshd
+
+View the enabled and disabled  settings for all units. Optionally,  limit  the type of  unit. 
+
+systemctl  list-unit-files  --type=service
+
+See only failed services：
+systemctl  --failed  --type=service
+
+
+
+[root@serverx  -]#  systemctl start sshd.service
+[root@serverx  -]#  systemctl stop sshd.service
+
+[root@serverx  -]#  systemctl restart sshd.service
+[root@serverx  -]#  systemctl staus sshd.service
+
+[root@serverx  -]#  systemctl reload sshd.service
+
+
+Unit dependencies 
+Services may be  started  as  dependencies of other services.  If a socket unit is enabled  and the 
+service unit with the same name is not, the service will automatically  be started when a  request 
+is made on the network socket. Services may also  be triggered by path units when a  file system 
+condition is met. 
+
+The systemctl  list-dependencies  UNIT 
+
+command can be used to display a  tree of other 
+units which must  be started in conjunction with a  specific unit. The  --reverse option to this 
+command will show what units need to have the specified unit started in order to run.
+
+ 
+Masking services 
+A system may have conflicting services installed for a certain function, such as firewalls (iptables 
+and firewalld). To  prevent an administrator from accidentally starting a  service, a  service may be 
+masked. Masking creates a  link in the configuration directories so that if the service is started, 
+nothing will happen.
+
+[root@serverx  -]#  systemctl mask network
+ln -s '/dev/null' '/etc/systemd/system/network.service'
+
+
+---------------------------------------------------------------------------------------------------------------------
+Command:  					        |  Task: 
+---------------------------------------------------------------------------------------------------------------------
+systemctl  status  UNIT  			|	View detailed information about a  unit state. 
+systemctl  stop  UNIT  	 			|	Stop a  service on a  running  system. 
+systemctl  start  UNIT   			|	Start a  service on a  running system. 
+systemctl  restart  UNIT  			|	Restart a  service on a  running system. 
+systemctl  reload  UNIT  			|	Reload configuration file of a  running service. 
+systemctl  mask  UNIT    			|	Completely disable a  service from being started, both manually and at boot. 
+systemctl  unmask  UNIT  			|	Make a masked service available. 
+systemctl  enable  UNIT  			|	Configure a  service to  start at  boot time. 
+systemctl  disable  UNIT 			|	Disable a  service from starting at  boot time. 
+systemctl  list-dependencies UNIT	| List units which are  required and wanted by the specified unit. 
+---------------------------------------------------------------------------------------------------------------------
