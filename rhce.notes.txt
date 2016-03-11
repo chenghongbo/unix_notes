@@ -1,4 +1,4 @@
-Features provided by systemd:
+﻿Features provided by systemd:
 
 •  Parallelization capabilities, which increase the boot speed of a  system. 
 •  On-demand starting of daemons without requiring a  separate service. 
@@ -195,3 +195,179 @@ During startup, systemd spawns a number of jobs.  If some of these jobs can not 
 will block other jobs from running. To inspect the current job list. an administrator can use the 
 command systemctl list-jobs. Any  jobs listed as running must complete before the jobs 
 listed as waiting can continue. 
+
+
+
+
+
+
+
+In  Red Hat Enterprise Linux 7, the configuration of network  interfaces is managed by a  system 
+daemon called NetworkManager.  For  NetworkManager: 
+•  A device  is a  network interface. 
+•  A connection  is a  collection of settings that can be configured for a  device. 
+•  Only one connection is active  for any one device at a  time. Multiple connections may exist, for 
+use by different devices or to allow a  configuration to be altered for the same device. 
+•  Each connection has a name or  ID  that identifies it. 
+•  The persistent conf iguration for a  connection is stored  in 
+/etc/sysconfig/network- scripts/ifcfg - name, where name  is the name of the 
+con nection (although spaces are  normally  replaced with underscores in the file name). This file 
+can  be edited by hand if desired. 
+•  The nmcli utility can be used to create and edit connection files  from the shell prompt. 
+
+
+
+------------------------------------------------------------------------------------------------------------------
+Command  			Purpose
+------------------------------------------------------------------------------------------------------------------
+nmcli dev status		Show the NetworkManager status of all network interfaces. 
+nmcli con show  		List  all connections. 
+nmcli con show name  		List  the current settings for  the connection name. 
+nmcli con add con-name name 	Add a  new connection named name. 
+nmcli con  mod name ...  	Modify the connection name. 
+nmcli con  reload  		Tell NetworkManager to reread the configuration files
+nmcli con  up  name		Activate the connection name. 
+nmcli dev  dis  dev  		Deactivate and disconnect the cu rrent connection on the network interface dev. 
+nmcli con  del  name		Delete the connection name and its configuration file. 
+ip  addr  show			Show  the current network  interface address configuration. 
+hostnamectl set-hostname	Persistently set the host name on this system. 
+------------------------------------------------------------------------------------------------------------------
+
+
+Network teaming
+Network teaming is method for linking NICs together logically to allow for failover or  higher 
+throughput. Teaming is a  new implementation that does not affect the older bonding driver in 
+the Linux kernel; it offers an alternate implementation. Red Hat Enterprise  Linux 7  supports 
+channel bonding for  backward compatability. Network teaming provides better  performance and 
+is more extensible because of its modular design. 
+Red Hat Enterprise Linux 7  implements network teaming with a  small kernel driver and a  user­
+space daemon, teamd. The kernel handles network packets efficiently and teamd handles logic 
+and interface processing. Software, called runners,  implement load balancing and active-backup 
+logic, such as round robin. The following runners are available to teamd:
+
+· broadcast: a simple runner which transmits each packet from all ports. 
+. round robin: a simple runner which transmits packets in a round-robin fashing from each of the ports. 
+· activebackup: this is a failover runner which watches for link changes and  selects an active port for data transfers. 
+· loadbalance: this runner monitors  traffic and uses a hash function to try to reach a  perfect 
+balance when selecting ports for packet transmission. 
+· lacp: implements the 802.3ad Link Aggregation Control Protocol. Can use the same transmit port selection possibilities as the loadbalance runner.
+
+
+
+All network interaction is done through a team interface, composed of multiple network port 
+interfaces. When controlling teamed port interfaces using NetworkManager,  and especially when 
+fault finding, keep the following in mind: 
+•  Starting the network team interface does not automatically start the port interfaces. 
+•  Starting a port interface always starts the teamed interface. 
+•  Stopping the teamed interface also stops the port interfaces. 
+•  A teamed interface without ports can start static IP connections. 
+•  A team without ports waits for ports when starting DHCP connections. 
+•  A team with a DHCP connection waiting for ports completes when a port with a carrier is added. 
+•  A team with a DHCP connection waiting for ports continues waiting when a port without a carrier is added. 
+
+Configuring network teams 
+The nmcli command can be used to create and manage team and port interfaces. The following 
+four steps are used to create and activate a network team interface: 
+1.  Create the team  interface. 
+2.  Determine the  1Pv4 and/or 1Pv6 attributes of  the team  interface. 
+3.  Assign the port interfaces. 
+4.  Bring the team  and port interfaces up/down. 
+
+Create the team interface 
+
+Use  the nmcli command to create a connection for the network team  interface, with the 
+following syntax: 
+
+		nmcli con add type team con-name CNAME ifname INAME [config  JSON] 
+		
+where CNAME will be  the name used to refer to  the connection, INAME will be  the interface name, 
+and JSON specifies the runner to be  used. JSON has the following syntax:
+
+ 
+	'{ "runner":  {"name": "METHOD"}} ' 
+	
+where METHOD  is one of  the following: 
+	broadcast, roundrobin, activebackup, loadbalance, or lacp.
+	
+[root@demo -)#  nmcli con add type team con-name team0 ifname team0 config  '{"runner": {"name": "loadbalance"}}'
+
+Determine the IPv4/IPv6 attributes of  the team interface 
+Once  the network team  interface is created, IPv4 and/or IPv6 attributes can be assigned to it. If 
+DHCP is available, this step is optional, because the default attributes configure the interface to 
+get its IP settings using DHCP
+
+The following example demonstrates how to assign a static  IPv4 address  to  the team0  interface:
+
+[root@demo -]# nmcli con  mod  team0  ipv4.addresses  1.2.3.4/24  
+[root@demo -]# nmcli con  mod  team0  ipv4.method  manual
+
+
+Assign ports to team interface:
+	nmcli con add type team-slave  con-name CNAME ifname INAME master TEAM
+	
+When  the team  interface is up, the teamdctl command can be used to display the team's state. 
+The output of this command includes the status of the port interfaces.
+
+
+NetworkManager creates configuration files  for  network teaming in the 
+/etc/sysconfig/network-scripts the same way it does for other interfaces. A 
+configuration file is created for each of the interfaces: for the team, and each of the ports. 
+The configuration file for the team  interface defines the IP settings for the interface. The 
+DEVICETYPE variable informs the  initialization scripts this is a network team interface. 
+Parameters for teamd configuration are defined  in the TEAM_CONFIG variable. Note that the 
+contents of TEAM_CONFIG uses JSON syntax.
+
+		# /etc/sysconfig/network-scripts/ifcfg-team0 
+		DEVICE=team0 
+		DEVICETYPE=Team 
+		TEAM_CONFIG="{\"runner\":  {\"name\": \"broadcast\"}}" 
+		BOOTPROTO=none 
+		IPADDR0=172 .25.5.100 
+		PREFIX0=24 
+		NAME=team0
+		ONBOOT=yes  
+		
+		# /etc/sysconfig/network-scripts/ifcfg-team0-eth1 
+		DEVICE=eth1 
+		DEVICETYPE=TeamPort 
+		TEAM_MASTER=team0 
+		NAME=team0-eth1 
+		ONBOOT=yes
+		
+
+Initial  network team  configuration is set when the team  interface is created. The default  runner 
+is roundrobin, but a different runner can be chosen by specifying a JSON string when the team 
+is created with the team.config subcommand. Default values for runner parameters are  used 
+when they are not specified.
+
+		nmcli con mod IFACE team.config  JSON-configuration-file-or-string
+		
+# cat /tmp/team.conf	
+{ 
+	"device": "team0", 
+	"mcast_rejoin": { 
+		"count": 1 
+	}, 
+	"notify_peers" : { 
+		"count": 1 
+	}, 
+	"ports": { 
+		"eth1": { 
+	"prio": -10, 
+	"sticky": true, 
+		"link_watch": { 
+			"name": "ethtool" 
+			} 
+		},
+		"eth2": { 
+	"prio": 100, 
+		"link_watch": { 
+			"name": "ethtool"
+				}
+			}
+		},
+		"runner": { 
+			"name": "activebackup"
+			}
+	}
+[root@demo -]# nmcli con mod team0 team.config  /tmp/team.conf 
