@@ -371,3 +371,124 @@ when they are not specified.
 			}
 	}
 [root@demo -]# nmcli con mod team0 team.config  /tmp/team.conf 
+
+
+
+The link_watch settings in the configuration file determines how the  link state of the port 
+interfaces are monitored. The default  looks like  the following, and uses functionality similar to 
+the ethtool command to check the  link of each interface: 
+
+	"link_watch": { 
+		"name": "ethtool"
+		}
+
+Another way to  check link state  is to  periodically use an ARP ping packet to  check for remote 
+connectivity.  Local  and remote  IP addresses and timeouts would have to be specified. A 
+configuration that would accomplish that would look similar to  the following:
+
+	"link_watch":{ 
+		"name": "arp_ping", 
+		"interval":  100, 
+		"missed_max": 30, 
+		"source_host": "192.168.23.2", 
+		"target_host": "192.168.23.1"
+	}, 
+	
+	
+	
+Display  the team  ports of the team0  interface:	
+[root@demo -]# teamnl  team0  ports
+4: eth2:  up 0Mbit HD 
+3: eth1:  up 0Mbit HD 
+
+Display the currently active port of team0:
+[root@demo -]# teamnl  team0  getoption  activeport 
+3 
+
+Set the option for the active port of team0:
+[root@demo -]# teamnl team0 setoption activeport 3
+
+Use teamdctl to display the cu rrent state of the teama  interface: 
+
+		[root@demo -]# teamdctl team0  state 
+		setup: 
+			runner:  activebackup 
+		ports : 
+			eth2 
+				link watches: 
+					link summary: up 
+					instance[link_watch_0] : 
+					name: ethtool 
+					link: up 
+			eth1
+				link watches: 
+					link summary: up 
+					instance[link_watch_0] : 
+						name: ethtool 
+						link: up 
+		runner: 
+			active  port: eth1
+			
+			
+teamdctl team0 config dump
+
+
+
+Software bridges 
+
+A network bridge is a link-layer device that forwards traffic between networks based on MAC 
+addresses.  It learns what hosts are connected to  each network, builds a table of MAC addresses, 
+then makes packet forwarding decisions based on that table. A  software bridge can be used in 
+a  Linux environment to emulate a  hardware  bridge. The most common application for software 
+bridges is in virtualization applications for sharing a hardware NIC among one or more virtual 
+NICs. 
+
+Configure  software  bridges 
+The nmcli can be used to configure software bridges persistently.  First. the software bridge is 
+created, then existing interfaces are  connected to it. For example,  the following commands will 
+create a  bridge called br0  and attach both the ethl and eth2 interfaces to  it. 
+
+
+[root@demo  -]#  nmcli  con add type bridge con-name  br0  ifname  br0 
+[root@demo  -]#  nmcli  con add type bridge-slave  con-name  br0-port1  ifname  eth1  master  br0
+[root@demo  -]#  nmcli  con add type bridge-slave  con-name  br0-port2  ifname  eth2  master  br0
+
+
+Softwa re bridge configuration files 
+Software bridges are managed by interface configuration files found in the 
+/etc/sysconfig/network-scripts directory. There  is an ifcfg-*  configuration file for 
+each software bridge. 
+The following  is a sample configuration file for a  software bridge: 
+
+		# /etc/sysconfig/network-scripts/ifcfg-br1
+		DEVICE=br1 
+		NAME=br1 
+		TYPE=Bridge 
+		BOOTPROTO=none 
+		IPADDR0=172.25.5.100 
+		PREFIX0=24 
+		STP=yes 
+		BRIDGING�OPTS=priority=32768
+		
+The following configuration file attaches an Ethernet  interface to a software bridge: 	
+		# /etc/sysconfig/network-scripts/ifcfg-br1-port0
+		TYPE=Ethernet 
+		NAME=br1-port0 
+		DEVICE=eth1 
+		ONBOOT=yes 
+		BRIDGE=br1
+		
+=====================  NOTE =====================	
+To implement a  software bridge on  an existing teamed or  bonded network interface 
+managed by NetworkManager,  NetworkManager wi ll have to be disabled since it only 
+supports bridges on simple Ethernet  interfaces. Configuration files for  the bridge will 
+have  to be created by hand. The ifup and ifdown utilities can be used to manage the 
+software bridge and other network interfaces. 
+
+
+The brctl show command will display  software bridges and the  list of  interfaces attached to 
+them. 
+
+[root@demo  -]#  brctl  show 
+bridge name		bridge id 				STP enabled		interfaces
+br1  			8000.52540001050b		yes				eth1
