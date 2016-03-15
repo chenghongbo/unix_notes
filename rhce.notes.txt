@@ -492,3 +492,287 @@ them.
 [root@demo  -]#  brctl  show 
 bridge name		bridge id 				STP enabled		interfaces
 br1  			8000.52540001050b		yes				eth1
+
+# Ping  the local network gateway using the software bridge. 
+[root@serverX  -]#  ping  -I  brl  192.168.0.254 
+PING  192 .168.0.254  (192.168.0.254 )  from  192 .168.0.100  brl :  56 (84)  bytes  of  data . 
+64  bytes  from  192 .168.0.254 :  icmp_seq=10  ttl=64  time=0 .520  ms 
+64  bytes  from  192 .168.0.254 :  icmp_seq=11  ttl=64  time=0 .470  ms 
+64  bytes  from  192 .168.0.254 :  icmp_seq=12  ttl=64  time=0 .339  ms 
+64  bytes  from  192 .168.0.254 :  icmp_seq=13  ttl=64  time=0 .294  ms 
+...  Output  omitted  ... 
+
+
+
+firewalld  is the default method in Red Hat Enterprise Linux 7  for managing host-level 
+fi rewa lls. Sta rted from the firewalld.service systemd service, firewalld manages the 
+Linux kernel netfilter subsystem  using the low-level iptables, ip6tables, and ebtables 
+commands.
+
+=================== NOTE ===============
+The firewalld.service and iptables.service, ip6tables.service, and 
+ebtables.service services conflict with each other. To  prevent accidentally starting 
+one of the *tables.service services (and wiping out any running firewall config  in 
+the process), it is good practice  to mask them using  systemctl. 
+
+[root@serverX  -]#  for  SERVICE  in  iptables  ip6tables  ebtables ;  do 
+>  systemctl  mask  ${SERVICE}.service 
+>  done 
+
+
+firewalld separates all incoming traffic  into zones, with each zone having  its own set of rules. 
+To check which zone to use for an incoming connection, firewalld  uses this  logic, where the 
+first  rule that matches wins: 
+
+1.  If the source address of an  incoming packet matches a  source  rule setup for a  zone, that 
+packet will  be routed through that zone. 
+2.  If the incoming interface for a  packet matches a  filter setup for a zone, that zone will be 
+used. 
+3.  Otherwise, the default zone  is used. The default zone  is not a  separate zone;  instead,  it 
+points to one of the other zones defined  on the system.
+ 
+Unless overridden by an administrator or a  NetworkManager configuration, the default zone for 
+any new network interface will be set to the public zone. 
+
+
+Zone  name  		Default configuration 
+---------------------------------------------------------------------------------------------------
+trusted				Allow all incoming traffic. 
+---------------------------------------------------------------------------------------------------	
+home 				Reject incoming traffic unless  related to outgoing traffic or matching 
+					the ssh, mdns, ipp-client, samba-client, or dhcpv6-client predefined services. 
+---------------------------------------------------------------------------------------------------
+internal  			Reject incoming traffic unless related to outgoing traffic or matching 
+					the ssh, mdns, ipp-client, samba-client, or dhcpv6-client predefined services。
+---------------------------------------------------------------------------------------------------					
+work  				Reject  incoming traffic unless related to outgoing traffic or matching 
+					the ssh, ipp-client, or dhcpv6-client predefined services.					
+---------------------------------------------------------------------------------------------------
+public  			Reject  incoming traffic unless  related to outgoing traffic or matching 
+					the ssh or dhcpv6-client predefined services. The default zone for newly added 
+					network interfaces.
+---------------------------------------------------------------------------------------------------					
+external  			Reject incoming traffic unless related to outgoing traffic or matching 
+					the ssh predefined service. Outgoing  IPv4 traffic forwarded through 
+					this zone  is masqueraded to  look like  it originated from the  IPv4 
+					address of the outgoing network  interface. 
+---------------------------------------------------------------------------------------------------					
+dmz  				Reject incoming traffic unless related  to outgoing traffic or matching 
+					the ssh predefined service. 
+---------------------------------------------------------------------------------------------------					
+block  				Reject all incoming traffic unless  related  to  outgoing traffic.
+---------------------------------------------------------------------------------------------------					
+drop  				Drop all  incoming traffic unless related to outgoing traffic (do not even 
+					respond with  ICMP errors). 					
+---------------------------------------------------------------------------------------------------	
+
+
+Managing firewalld 
+firewalld  can be managed  in three ways: 
+1.  Using the command-line tool firewall-cmd. 
+2.  Using the graphical tool firewall-config. 
+3.  Using the configuration files  in /etc/firewalld/
+
+In most cases, editing the configuration files directly is not  recommended, but  it can be useful to 
+copy configurations in this way when using configuration management tools. 
+
+Configure  firewall settings with firewall-cmd 
+
+This section will focus on managing firewalld  using the command-line tool firewall- cmd. 
+firewall-cmd  is installed as part of the main firewalld package. firewall-cmd  can  perform 
+the same actions as firewall-config. 
+The fol lowing table lists a  number of frequently used firewall-cmd commands, along with an 
+explanation. Note that unless otherwise specified, almost all commands will work on the runtime 
+configuration, unless the --permanent option is specified. Many of the commands listed take 
+the --zone=<ZONE>  option to determine which zone  they affect.  If --zone is omitted from 
+those commands, the default zone is used. 
+While configuring a  firewall, an administrator will normally apply all changes to the  - -
+permanent configuration, and then activate  those changes with firewall-cmd  --reload. 
+While testing out new, and possibly dangerous, rules,  an administrator can choose to work 
+on the runtime configuration by omitting the  --permanent  option. In those cases, an extra 
+option can be  used to automatically remove a  rule after a  certain amount of time, preventing an 
+administrator from accidentally locking out a  system:  - -timeout=<TIMEINSECONDS>。
+
+fi rewa ll -cmd example 
+The followi ng examples  show  the default  zone being set  to dmz, all traffic coming from the 
+192.168.0.0/24 network being assigned to the in ternal zone, and the network ports for 
+mysql being opened on the internal zone. 
+
+
+[root@serverX  -]#  firewall-cmd --set-default --zone=dmz 
+[root@serverx  -]#  firewall-cmd --permanent  --zone=internal  --add-source=192.168.0.0/24
+[root@serverX  -]#  firewall-cmd --permanent  --zone=internal  --add-service=mysql 
+[root@serverx  -]#  firewall-cmd --reload 
+
+Rich rules  concepts 
+Apart  from the regular zones and services syntax that firewalld offers, administrators  have 
+two other options  for adding  firewall rules: direct rules  and rich rules. 
+
+Direct  rules 
+Direct rules allow an administrator to insert hand-coded {ip,ip6,eb}tables rules  into 
+the zones managed by firewalld. While powerful, and exposing features of the kernel 
+netfilter subsystem not exposed through other means, these  rules  can be hard  to manage. 
+Direct rules  also offer less flexibility than standard  rules and rich rules. Configuring direct 
+rules is not covered  in this course, but documentation is available in the firewall-cmd(1) 
+and firewalld.direct (5) man pages for those administrators who are  already familiar with 
+{ip,ip6,eb}tables syntax. 
+Unless explicitly inserted  into a zone managed by firewalld, direct rules  will  be parsed before 
+any firewalld rules are. 
+
+[root@se rverx  -)# firewall-cmd  --direct  --permanent  --add-chain ipv4  raw  blacklist 
+[root@serverX  -]#  firewall-cmd  --direct  --permanent  --add-rule  ipv4  raw  PREROUTING 0 -s \
+192.168.0.0/24  -j  blacklist 
+[root@serverx  -]#  firewall-cmd  --direct  --permanent  --add-rule  ipv4  raw  blacklist  0  -m \ 
+limit  --limit  1/min  -j  LOG  -- log-prefix  "blacklisted " 
+[root@serverX  -]#  firewall-cmd  --direct  --permanent  --add-rule  ipv4  raw  blacklist  1  -j DROP 
+
+Rich rules 
+firewalld rich  rules give administrators an expressive  language in which to express custom 
+firewall rules that are  not covered by the basic firewalld syntax; for example,  to only allow 
+connections to a  service from a  single IP address, instead of  all IP addresses routed through a zone. 
+Rich rules  can be used to ex press basic all ow/deny  rules, but can also  be used to configure 
+logging, both to  syslog and auditd, as  we ll as  port forwards, masquerading, and rate limiting. 
+
+The basic syntax  of a  rich rule can  be expressed by the following block: 
+
+	rule 
+		[source] 
+		[destination] 
+		service | port | protocol | icmp-block | masquerade | forward-port 
+		[log] 
+		[audit] 
+		[accept|reject|drop] 
+
+Rule ordering 
+
+Once multiple rules have been added to a zone  (or the firewall in genera l), the ordering of rules 
+can have a  big effect on how  the firewall behaves. 
+The basic ordering of rules  inside a  zone  is the same  for all zones: 
+
+1.  Any port forwarding and masquerading rules set  for that zone. 
+2.  Any  logging rules set for that zone. 
+3.  Any allow rules set for that zone. 
+4.  Any deny rules set  for that zone. 
+
+In  all cases, the first match will win. If  a  packet has not been matched  by any rule  in  a  zone,  it will 
+typically be denied, but zones might have a  different default; for example, the trusted zone will 
+accept any  unmatched packet. Also, after matching a  logging rule, a  packet will continue to be 
+processed as normal. 
+Direct rules are an exception. Most direct rules will be parsed before any other processing is done 
+by firewalld,  but the direct rule syntax allows an administrator to  insert any  rule they want 
+anywhere in any zone. 
+
+Testing and  debugging 
+To make  testing and  debugging easier,  almost all  rules can be added to the runtime configuration 
+with a  timeout. The moment the rule with a  timeout  is added to the firewall, the timer starts 
+counting down for that  ru le. Once the timer for a  rule  has reached zero seconds, that  rule  is 
+removed from the runtime configuration. 
+Using timeouts can be an incredibly useful toot while working on a  remote  firewalls, especially 
+when testing more complicated  rule  sets.  If a  rule works, the administrator can add  it  again, 
+but with the --permanent option  (or at  least without a  timeout).  If the rule does not work 
+as intended, maybe even  locking the administrator out of the system, it will be removed 
+automatically, al lowing the administrator to continue  his or her work. 
+A timeout  is added to a  runtime rule by adding the option  --timeout=<TIMEINSECONDS>  to 
+the end of  the firewall-cmd  that enables  the rule
+
+[root@serverX  -]# firewall-cmd  --permanent --zone=classroom  --add-rich-rule='rule family=ipv4  source address=192.168.0.11/32 reject' 
+
+The difference  between reject and drop lies  in the fact that a  reject will send 
+back an  ICMP packet detailing that, and why, a  connection was rejected. A drop  just 
+drops the packet and does nothing else. Normally an administrator will want to use 
+reject for friendly and neutral networks, and drop only for hostile networks
+
+
+Logging with  rich rules 
+When debugging, or monitoring, a  firewall, it  can be  useful to  have a  log of  accepted or  rejected 
+connections. firewalld can accomplish this in two ways: by  logging to syslog, or by sending 
+messages to the kernel audit subsystem, managed by auditd. 
+In both cases, logging can be rate  limited. Rate limiting ensures that system  log files  do not fill up 
+with messages at a  rate such that the system can not  keep up, or fills all its disk space. 
+The basic syntax  for  logging to syslog using rich rules  is
+
+log  [prefix="<PREFIX  TEXT>"  [level=<LOGLEVEL>] [limit value="<RATE/DURATION>"]
+
+Where <LOGLEVEL>  is  one of emerg, alert, crit, error, warning, notice, info, or debug. 
+<DURATION>  can be one of s for seconds, m for minutes, h  for hours, or d  for days. For example, 
+limit  value=3/m will limit the log messages to a maximum of three per minute. 
+The basic syntax  for logging to the audit subsystem is: 
+
+audit  [limit  value= "<RATE/DURATION>"] 
+
+
+
+Network Address Translation  (NAT) 
+firewalld  supports two types of Network Address Translation  (NAT): masquerading and port 
+forwarding.  Both can be configured on  a  basic level with regular firewall-cmd  rules, and more 
+advanced forwarding configurations can be accomplished with rich rules. Both forms of  NAT 
+modify  certain aspects of a  packet,  like the  source or  destination, before sending  it  on. 
+
+Masquerading  ( IPV4 only)
+With masquerading, a  system will forward packets that are  not directly addressed  to  itself to 
+the  intended  recipient, while  changing the source address of the packets that  go through to  its 
+own public  IP address. When answers to  those packets  come  in, the firewall will then modify  the 
+destination address to the address of the original host, and send the  packet on. This is usually 
+used on the edge of a  network to provide  Internet access to an internal network. Masquerading  is 
+a  form of Network Address Translation  (NAT). 
+
+
+To  configure masquerading for a zone with regular firewall-cmd commands, use the following syntax: 
+
+[root@serverX  -]#  firewall-cmd  --permanent  --zone=<ZONE>  -- add-masquerade
+
+This will masquerade any  packets sent to  the firewa ll from clients defi ned in the sou rces for that 
+zone (both  inte rfaces and sub nets) that are  not  addressed to the firewall itself. 
+To  gain more  control over what clients will be masqueraded, a  rich rule can be  used as  well. 
+
+[root@serverX  -]#  firewall-cmd  --permanent  --zone=<ZONE>  --add-rich-rule='rule 
+family=ipv4  source address=192.168.0.0/24  masquerade'
+
+
+
+Port  forwarding 
+Another form of NAT  is  port forwarding. With port forwarding, traffic to a  single port is  forwarded 
+either to a  different port on the same machine, or to a  port on a  different machine. This 
+mechanism is typically used to "hide" a  server  behind another machine, or to provide access to a 
+service on  an alternate port. 
+
+Important 
+When a  port forward  is configured to forward packets to a  different machine, any 
+replies from that machine will normally be  sent directly to  the original client  from that
+machine. Since this will result in an invalid connection on most configurations,  the 
+machine that is forwarded to will have  to be masqueraded through the firewa ll that 
+performed the port  forwarding. 
+A common configuration is to forward a  port  from the firewall machine to a machine 
+that is already masqueraded behind the firewall. 
+
+As an example,  the following command will forwa rd  incoming con nections on port 513/TCP on 
+the fi rewa ll to port 132/TCP on the machine with the IP address 192  . 168 . 0.  254 for clients 
+from the public zone:
+
+firewall-cmd --permanent --zone=public  --add-forward-port=port=513:proto=tcp:toport=132:toaddr=192.168.0.254
+
+To gain more  control over port forwarding rules, the following syntax can be  used with rich rules: 
+forward-port  port=<PORTNUM>  protocol=tcp|udp  [to-port=<PORTNUM>]  [to-addr=<ADDRESS>]
+
+SELinux port  labeling 
+SELinux does more  than  just  file and process  labeling. Network traffic is  also tightly enforced 
+by the SELinux policy. One of the methods that SELinux uses for controlling network traffic 
+is labeling network ports; for example,  in the targeted policy,  port 22/TCP has the  label 
+ssh_port_t associated with it. 
+Whenever a  process wants to  listen on a port, SELinux will check to see if the label associated 
+with that process (the domain) is allowed to bind that port  label. This can stop a  rogue service 
+from taking over ports otherwise used by other (legitimate) network services.
+
+[root@serverx  -]#  semanage  port  -1 
+http_cache_port_t 	tcp  8080,  8118 ,  8123 ,  10001 - 10010 
+http_cache_port_t 	udp  3130 
+http_port_t 		tcp  80 ,  81,  443 ,  488 ,  8008 ,  8009 ,  8443 ,  9000 
+......
+
+For example,  to  allow a  gopher service to  listen on port 71/TCP:
+
+semanage  port -a -t  gopher_port_t  -p  tcp  71
+
+To remove the label:
+
+semanage  port  -d -t  gopher_port_t  -p  tcp  71 
