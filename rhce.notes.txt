@@ -776,3 +776,293 @@ semanage  port -a -t  gopher_port_t  -p  tcp  71
 To remove the label:
 
 semanage  port  -d -t  gopher_port_t  -p  tcp  71 
+
+Introduction to  iSCSI 
+The  Internet Small Computer System  Interface  (iSCSI)  is a TCP/IP-based protocol  for emulating 
+a  SCSI high-performance  local storage bus over  IP networks, providing data transfer and 
+management to  remote block storage devices. As a  storage area network (SAN) protocol, iSCSI 
+extends SANs across  local  and wide area networks  (LANs, WANs, and the  Internet), providing 
+location-independent data storage  retrieval with distributed servers and arrays. 
+
+The SCSI protocol suite provides the Command Descriptor Block (COB)  command set  over a 
+device bus communication protocol. The original SCSI topology used physical cabling with a 20-
+meter limitation for all devices per channel (cabled  bus). Devices used unique numeric target 
+IDs  (0-7, or  0-15 with dual channel). Physical SCSI disks and cabling were obsoleted by popular 
+implementation of Fibre Channel (FC), which retained the SCSI COB command set but replaced 
+the disk and  bus communication with protocols for  longer and faster optical cabling. 
+The iSCSI protocol also  retains the COB command set, performing  bus communication between 
+iSCSI systems that is encapsulated over standard  TCP/ IP.  iSCSI servers emulate SCSI  devices 
+using files,  logical volumes, or disks of any  type as the  underlying storage (backstore)  presented 
+as targets. An iSCSI service  is typically implemented  in  software above either an operating 
+system TCP/IP stack or a  TCP offload engine (TOE), a  specialized Ethernet  network interface
+The use of  iSCSI extends a  SAN beyond the limits of  local  cabling, facilitating storage 
+consolidation in local or remote data centers. Because  iSCSI structures are logical, new storage 
+allocations are made using only software configuration, without the need for additional cable 
+or physical disks.  iSCS I  also simplifies data replication, migration and disaster recovery using 
+multiple remote data centers
+
+iSCSI fundamentals 
+The iSCSI protocol functions in a  familiar client-server configuration. Client systems configure 
+initiator software  to  send SCSI commands to  remote server storage targets. Accessed  iSCSI 
+targets appear on the client  system as local, unformatted SCSI block devices,  identical  to devices 
+connected with SCSI  cabling, FC direct attached, or FC switched fabric. 
+
+Unlike  local block devices,  iSCSI network-accessed block devices are discoverable from many 
+remote initiators. Typical  local file systems (e.g., ext4, XFS, btrfs) do not support concurrent 
+multisystem mounting, which  can result  in  significant file system corruption. Clustered systems 
+resolve multiple system access by use of the Global File System (GFS2), designed to provide 
+distributed  file  locking and concurrent multinode file system mounting. 
+
+iSCS I  target  overview 
+In original SCS I  protocol  terminology, a  target  is a single connectible storage or output device 
+uniquely identified on a  SCSI bus.  In iSCS I, in which the SCSI bus  is  emulated across an IP 
+network, a  target ca n  be a  dedicated physical  device in a  network-attached storage enclosure or 
+an iSCSI software-configured  logical device on a  networked storage server. A  target.  like  HBAs 
+and  initiators, is an end point  in SCSI bus communication, passing command descriptor blocks 
+(COB) to request or provide storage transactions. 
+To  provide access to the storage or output device, a  target is configured with one or more logical 
+unit numbers  (LUNs). In iSCS I, LUNs appear as  the target's sequentially numbered disk drives, 
+al though targets typically have only one  LUN. An  initiator performs SCSI negotiation with a 
+target to  establish a  connection to  the LUN. The LUN responds as  an emulated SCSI  disk block 
+device, which can be used in raw form or formatted with a client-supported file system. 
+
+iSCS I  target  configuration 
+Target server configuration demonstration 
+targetcli  is both a  command-line utility and an interactive  shell  in which to create, delete, and 
+configure  iSCSI  target components. Target stack objects are grouped  into a  hierarchical  tree of 
+objects, allowing easy navigation and contextual configuration. Familiar Linux commands are 
+used  in this shell: cd, ls, pwd, and set. 
+The targetcli shell  al so supports TAB completion. Administrators can use TAB to either 
+complete partially  typed commands or view a  list of acceptable key-words at the current  location 
+in a  command.
+
+The targetcli shell  also supports TAB completion. Administrators can use TAB to either 
+complete partially  typed commands or view a  list of acceptable key-words at the current  location 
+in a  command.
+
+Install targetcli if needed.
+Run targetcli with no options to enter interactive mode. 
+
+Create backing storage (backstores) . There are several  types of  backing storage. 
+•  block  - A  block device defined on  the server. A  disk drive, disk partition, a  logical volume, 
+multipath device, any device files defined on the server that are of type b. 
+•  fileio - Create a  file,  of a  specified size,  in the filesystem of the server. This method  is 
+similar to using  image files  to be the storage for virtual machine disk images. 
+•  pscsi - Physical  SCS I. Permits passthrough to a  physical  SCS I  device  connected to the 
+server.  This backstore type is not  typically used. 
+•  ramdisk - Create a  ramdisk device, of a  specified size,  in memory  on the server. This 
+type of storage will not store data persistently. When the server is rebooted, the ramdisk 
+definition wi ll return when the target  is instantiated, but all data will have been  lost.
+
+
+
+
+
+
+
+
+
+Linux  containers 
+A  container  is a  lightweight application isolation mechanism that  allows the kernel to run groups 
+of processes  in their own  isolated user spaces, separate from the host system. The container 
+has its own process  list, network stack, file systems, and other resources, but shares the kernel 
+with the host and the other containers  running on the system. Linux containers are  implemented 
+through  a  combination of three kernel features: namespaces for isolation, control groups for 
+resource control, and SELinux for security. 
+A  tool called Docker is used to  create, control, and manage containers. Docker adds an API ,  an 
+image format, and a  delivery  and sharing model to Linux containers. A Docker image contains 
+an application and all its dependencies. When a  container is started, a  read-write  layer for that 
+container  is  combined with the read-only image using LVM  thin provisioning. Docker images are 
+portable and can be  saved and exported to other systems and users. 
+
+Namespaces 
+The kernel provides  container isolation through names paces, which create a  new environment 
+with a  unique view of a  subset of  the resources on the system. Some have called namespaces 
+"chroot on steroids,"  since  instead of just  providing processes with a  different root file system, 
+processes al so have a  different view of the process table,  networking stack, and so on. 
+There are  five different types of namespaces currently in use by containers: 
+
+Control groups 
+Control  groups  (cgroups) are  used by  the kernel to manage system  resources. Cgroups allow  fair 
+(or unfair)  allocation of CPU time, memory, and  I/O Bandwidth among processes and groups of 
+processes. Containers  use cgroups to manage resource consumption, so that a  container will get 
+a  certain share of system resources but not  steal all system resources. 
+Management of cgroups is beyond the scope of this course. System  administrators familiar with 
+cgroups  should be aware that RHEL 7  now uses systemd scope and slice units to more  easily 
+manage cgroups. 
+
+
+SELinux and containers 
+Not  everything  is  namespaced, and containers  are  less secure  than virtual machines.  In order to 
+protect the host  and other containers  from a  compromised container,  SELinux is used. 
+With SELinux enforcing, container processes can  only write to container files. Container 
+processes run as the type svirt_lxc_net_t, and image files  are  labeled with the type 
+svirt_sandbox_file_t. 
+To  keep two containers from accessing each other,  even  though they  have  the same SELinux 
+type, Multi-Category  Security (MCS) types are used. Each container runs as svirt_lxc_net_t, 
+but is assigned a  random and unique category when it is started by Docker.  If a  process has the
+right SELinux type but  its category does not match, access  is denied. A  reference at the end of 
+this section provides a  high-level overview of SELinux MCS type checking.
+
+Docker 
+Docker provides the user interface, API, image format, and other tools used to manage Linux 
+containers  in RHEL 7. The docker package is provided by a  special repository, RHEL 7  Extras 
+(rhel-7-server-extras-rpms), which is updated under more aggressive engineering criteria 
+than  the core  distribution. 
+Docker runs a  daemon started by the systemd  unit docker.service to manage containers. 
+The user  interacts with  this daemon through the docker command. Images are  stored  in  a  local 
+index kept in the /var /lib/docker directory,  but are  loaded and exported with the docker 
+command. 
+
+Docker  images 
+A  Docker image  is a  static snapshot of a  container's configuration, which is used to  launch a 
+container. The image  is a  read-only layer that  is  never modified.  Instead, Docker adds a  read­
+write overlay to which all changes  are made. Changes  are saved by creating a  new  image. A 
+single image can be used to generate many  containers that are very slightly different, but only 
+need enough disk space to store a  very  small amount of differences.
+
+A platform  image  is an  image with  no parent. This  is a  baseline  image  that defines the core 
+runtime environment, packages, and utilities needed to  run an application. RedHat provides 
+an extremely minimal platform  image for RHEL 7  that has the minimum required  packages to 
+support a  container,  bash, and  to use yum to download and  install additional packages  into a 
+container. 
+
+The Docker registry 
+Platform  images  can be  provided as a  tar archive  and loaded manually. More frequently,  they 
+are pulled from a Docker registry.  This repository may be available to the public. Red Hat provides
+a  read-only  registry at registry.access.redhat.com,  from which the RHEL 7  base platform 
+image can be pulled. Docker maintains a  public registry from which open source community­
+provided  images can be pulled. 
+It is also possible to use the docker-registry package to set up a  simple private  repository.  Images 
+can  be pushed to this private repository and pulled  by other machines  in the  network. 
+
+Containers  and  virtualization 
+Containers  and virtualization are two technologies that provide complementary ways of  dividing 
+up system  resources. Containers  can be run on virtual machines and  in cloud computing 
+environments, combining both technologies.  If virtualization "vertically" abstracts hardware, 
+containers  can  be said to "horizontally" segment operating systems. 
+There are use cases more  suited for one technology or the other.  Some advantages of Docker 
+containers: 
+Containers are  lightweight  in resource use, so more  containers  can be run on the same 
+hardware. 
+•  Containers can  be created and  destroyed more  quickly than virtual machines. 
+Un like  virtual machines, containers  do not need to support an entire operating system; only a 
+core runtime  is  needed for the application. This allows rapid application deployment. 
+Docker images have a  version control stream, so successive versions of an image can be 
+tracked and even reverted. Components reuse components from other layers, making 
+container images  very  lightweight. 
+Docker images are easily transferable to other machines which have Docker available.
+
+By comparison, some advantages of virtualization: 
+Virtual machines  run their own kernel and  full operating system, which allows stronger 
+isolation between the host hypervisor and the virtual machine. 
+Virtual machines can easily run operating systems and kernels that  are completely different 
+than the hypervisor host's operating system. 
+Virtual machines can be live-migrated  from one hypervisor node to another while running; 
+containers must be stopped before  being moved  from one machine to another.
+
+Using Docker
+
+[root@demo  -)#  subscription-manager repos  --enable=rhel-7-server-extras-rpms 
+[root@demo  -]#  subscription-manager repos  --enable=rhel-7-server-optional-rpms 
+[root@demo  -)#  yum  install  docker
+
+[root@demo  -)#  systemctl  start  docker ;  systemctl  enable  docker
+
+Pu ll ing or loading platform  images 
+Once  Docker is installed, the next step is to  get  base platform  images  into the machine's local 
+index. One way to do  this  is to  pull the images from a  remote Docker registry. This can be  done 
+with the command docker  pull  repository/image -name.  If no repository is specified, 
+the community Docker hub repository is assumed. Red Hat has an official base image named 
+redhat/rhel7 available at registry.access.redhat.com. 
+
+[root@demo  -]#  docker  pull  registry.access.redhat.com/redhat/rhel7
+
+docker  load  -i  rhel-server-docker-7.0-21.4-x86_64.tar.gz
+
+[root@demo  -]#  docker  images 
+REPOSITORY									TAG			IMAGE ID		CREATED		VIRTUAL SIZE 
+registry.access.redhat.com/redhat/rhel7		0			e1f5733f050b  	3 days ago  140.2 MB 
+registry.access.redhat.com/redhat/rhel7		0-21		e1f5733f050b  	3 days ago  140.2 MB
+
+Running  Docker containers 
+The docker  run command  is  used to  run a  container.  In its simplest form,  it  takes two 
+arguments: the name of the  image to use, and the  name of a  command to run  in the container. 
+Here  is  an example that will run a  container in interactive mode,  using the image rhel7, and run 
+the command cat  /etc/hosts. When the command exits, the container will be stopped. The 
+- - rm command will delete the container when it exits.
+
+[root@demo  -]#  docker  run  -i  -t  --rm  rhel7  cat  /etc/hosts
+
+A more  useful  example will start a  new container,  running the bash command:
+
+[root@demo  -]#  docker  run  -i  -t  rhel7  bash 
+bash -4 .2#  echo  hello  >  /tmp/testfile 
+bash -4 .2#  exit 
+exit 
+[root@demo  -]#
+
+This time, when the container exited, it did not  remove its file system because the  --rm option 
+was not  included. This can  be seen with the docker  ps  -a command. The  -a  option shows 
+all containers  on the system, running or stopped. (Without  -a, only running containers  are 
+displayed.)
+
+Creating Docker images 
+In the next example, a  Docker image will be  created from the base image that includes the httpd 
+package. The new image will then be  used to  run a  container. 
+Run a  container from the base RHEL 7  image once, to manually install the httpd package. 
+
+docker run -i  rhel7 bash -c "yum  install  -y  httpd ;  yum  clean  all"
+
+After  the packages  have installed and the container has exited,  identify the last container 
+which wa s  run with docker  ps  -l. With the name or ID of the container,  the docker  commit 
+command can  be used to create the  new image from the container's file system. The following 
+command will also include a  comment (with  -m). 
+
+[ root@demo  -]#  docker  ps  -1 
+CONTAINER ID  IMAGE				COMMAND						CREATED			STATUS  PORTS  				NAMES 
+ecaf8a3102a3  redhat/rhel7:0	bash  - c  'yum  clean  a 4  minutes  ago	Exited (0) 3 minutes ago  dreamy_goodall1
+
+[root@demo  -]#  docker  commit  -m  "RHEL7  +  httpd"  dreamy_goodall1  rhel_httpd 
+74acf538ab6f5308a77bc308abae753e4ee683583eb4821455bccd4a141a7591 
+
+[root@demo  -]#  docker  images 
+REPOSITORY  TAG  IMAGE  ID  CREATED  VI RTUAL  SIZE 
+rhel_httpd  latest  74acf538ab6f  52  seconds  ago  168.2  MB 
+registry.access.redhat.com/redhat/rhel7  0  e1f5733f050b  3  days  ago  140 .2  MB 
+registry.access.redhat.com/redhat/rhel7  0 - 21  e1f5733f050b  3  days  ago  140.2  MB
+
+
+Now a  container can be run which uses this new  image as its baseline. The following command 
+will  introduce two new options. The  -p 8080:80 option will map port 8080/TCP on the host to 
+port 80/TCP on the container. The  -d will cause the container to start in the background. The 
+command /usr/sbin/httpd  -DFOREGROUND will start Apache HTTPD in a very basic mode in 
+the container. 
+
+
+Starting a  private Docker registry 
+To make it  easier to  distribute finished images to  other hosts, system administrators can push 
+their images to a  Docker registry.  RedHat provides a  package, docker-registry, which can be used 
+to set up a  private registry for an organization's internal use. This server does not  need to be on 
+a  host running Docker itself. 
+
+Pushing  images  to a  private  registry 
+To  push an  image to a  private repository,  it must first be tagged with the host address and  port 
+of  the repository with docker  tag. It can then be  pushed with docker  push.
+
+Exporting  images  to a  file 
+The docker  save command can be used to save an image file to an uncompressed tar archive. 
+This file can  then be copied to another Docker host and loaded into its index with docker  load. 
+This archive will include all the  layers needed to reconstruct the  image.
+
+Cleaning up 
+Several commands are  useful for cleaning up  containers: 
+•  docker  stop  container will stop a  container gracefully,  and docker  kill  container 
+will send it a  kill signal. 
+•  docker  rm  container will delete a  container's file system  image permanently from the 
+local index. Once this is done, the container can not  be restarted; it must be recreated. 
+•  docker  rmi image will remove an image from the host's index. It does not  remove that 
+image from a  registry.  It is important not to remove any images that a host may currently be 
+using. 
+•  docker  info will provide some basic information about the Docker environment and current 
+resource consumption. 
