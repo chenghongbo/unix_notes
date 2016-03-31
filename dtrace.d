@@ -2,6 +2,9 @@ What is Dtrace?
 What can it do for us?
 which OS is Dtrace available on?
 
+What is a probe?
+A probe that has a module and function as part of its name is known as an anchored probe, and one that does not is known as unanchored.
+
 How to specify a probe?
 	provider:module:function:name
 
@@ -22,3 +25,4 @@ How to specify a probe?
 	Name: The final component of the probe description is a name that gives you some idea of the probe's
 	semantic meaning, such as BEGIN or END.
 	This name can be referenced in a D program by using the built-in variable probename.
+

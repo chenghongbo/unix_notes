@@ -30,3 +30,21 @@ Issues:
 To test setup:
 		echo "127.0.0.1" > ~/ansible_hosts
 		ansible all -m ping
+
+Run Ad-hoc commands
+	-- copy file, where 'atlanta' could be a server name or group name in the inventory file
+	ansible atlanta -m copy -a "src=/etc/hosts dest=/tmp/hosts"
+	ansible hostname -m shell -a 'echo $TERM'
+	ansible webservers -m file -a "dest=/srv/foo/b.txt mode=600 owner=mdehaan group=mdehaan"
+	ansible webservers -m file -a "dest=/path/to/c state=absent"
+	ansible webservers -m yum -a "name=acme state=latest"
+	ansible all -m user -a "name=foo password=<crypted password here>"
+	ansible webservers -m service -a "name=httpd state=started"
+	ansible webservers -m service -a "name=httpd state=restarted"
+
+	ansible all -B 1800 -P 60 -a "/usr/bin/long_running_operation --do-stuff"
+	-- The above example says “run for 30 minutes max (-B: 30*60=1800), 
+	--   poll for status (-P) every 60 seconds”.
+
+	ansible hostname -m setup
+	-- list basic information about clients (facts)
