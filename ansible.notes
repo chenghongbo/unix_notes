@@ -1,0 +1,32 @@
+What:
+	a configuration management application wirten in Python, the same category of Puppet, Chef
+
+Why:
+	no client application required (works over SSH)
+	simple architecture
+	easier to maintain
+	use text file to store client hostnames (but could be an issue if thousands or more )
+setup
+	--requires python 2.6/2.7, pip, bash shell (if running on BSD or non-linux platforms)
+		some python packages
+		 pip install paramiko PyYAML Jinja2 httplib2 six
+
+	-- installation using source 
+		git clone https://github.com/ansible/ansible.git --recursive
+		cd ansible; source hacking/env-setup
+		export ANSIBLE_INVENTORY=~/ansible_hosts (file to store client hostnames or groups)
+
+		-- to update
+			git pull --rebase
+			git submodule update --init --recursive
+
+Issues:
+	requires SSH key setup before it can run commands on client (remotely)
+		- can be worked around by setting ansible_ssh_pass variable, teperarily
+	
+	doesn't work well when python is not located in /usr/bin/python
+		- need to set ansible_python_interpreter variable for these hosts (clients)
+
+To test setup:
+		echo "127.0.0.1" > ~/ansible_hosts
+		ansible all -m ping
