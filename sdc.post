@@ -1,0 +1,15 @@
+1. add external IP to adminui and imgapi
+	sdcadm post-setup common-external-nics
+
+2. get IP address of adminui
+	sdc-vmadm ips -p $(sdc-vmname adminui)
+
+3. Adding the cloudapi core service zone
+	In order to use either the smartdc or triton you will need to install the cloudapi zone. Additionally, this is required if you will be running the end-user portal.
+
+	sdcadm post-setup cloudapi
+	sdc-vmadm ips -p $(sdc-vmname cloudapi)
+
+4. Linking Triton data centers
+
+Triton supports UFDS linking, which allows two data center to share key user data, including ssh keys, passwords, and RBAC information. UFDS or Data Center Linking must be done after installing the head node in second and subsequent Triton Installations; to link two data centers, please follow the instructions at Linking Triton data centers.
