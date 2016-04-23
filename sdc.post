@@ -13,3 +13,12 @@
 4. Linking Triton data centers
 
 Triton supports UFDS linking, which allows two data center to share key user data, including ssh keys, passwords, and RBAC information. UFDS or Data Center Linking must be done after installing the head node in second and subsequent Triton Installations; to link two data centers, please follow the instructions at Linking Triton data centers.
+
+
+#===== troubleshoot compute node setup failure ===========
+1. Find the IP of the compute node from the Admin UI
+2. Obtain the compute node root password by running /usbkey/scripts/mount-usb.sh && cat /mnt/usbkey/private/root.password.* on your headnode. 
+3. Login to the compute node. Run bunyan $(svcs -L ur) on the compute node and check the output for errors.
+4. the error I found on my computer node is:
+	17 May 14:09:01 ntpdate[3809]: no server suitable for synchronization found\'\\\'\'\'\n
+	[2016-05-17T14:09:17Z] ./joysetup.sh:80: fatal(): exit 1\n'
