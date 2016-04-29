@@ -1,3 +1,12 @@
+Self Introduction:
+	I'm Alan and I have around 15 years' experiences in IT infrastructure support area, in both manufacturing factories and multinational technology companies like EDS and eBay. 
+	
+	I started out as an IT help desk in a flour factory, then after 3 years or so I started to work as Windows system admin in BenQ, a computer peripheral manufacturer, supporting corporate IT infrastructure and their product line. then after 2 years, I moved on to work with eBay China as windows system admin to support corporate IT infrastructure. then 
+	
+	I support the 
+	
+	In 2008, I joined Bleum, an IT outsourcing company, as unix engineer lead, and switched from a Windows sysadmin to a Linux admin. There I set up and lead a team of 4 Engineers to support the unix infrastructure for our client, Walmart.com, together with the onsite team. after over 2 years I moved on to eBay as a Senior unix admin.
+
 Reason for Leaving Morgan:
 		There was no single factor that made me to leave, it was many things came together and they left little room for possible workaround. Some of the major issues were work-life balance and the fact that more than 60% of time and energy were spent on process compliance, instead of the work itself. They have strong reason to do so as a financial company where any errors/mistakes leads to direct loss of money and reputation, unfortunately, I found myself having some hard time adjusting to this style.
 

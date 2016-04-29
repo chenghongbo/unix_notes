@@ -7,7 +7,6 @@ Solaris 11 network management
 
 	如果网络管理为固定模式，netadm会给出以下信息：
 
-
 	netadm: DefaultFixed NCP is enabled; automatic network management is not available.
 	’netadm list’ is only supported when automatic network management is active.
 
@@ -18,22 +17,17 @@ Solaris 11 network management
 	ncp		Automatic	online		active
 	......
 
+	
+	netadm enable -p ncp DefaultFixed  ## 切换为手工配置模式（固定网络管理）
+	netadm enable -p ncp Automatic     ## 切换为自动配置模式
+	
+	
 2. ipadm 和 dladm命令只能用于固定网络管理模式(DefaultFixed)，netcfg命令只能用于自动网络管理模式
 
 3. 启用固定网络管理模式：
 
-	# netadm enable -p ncp defaultfixed
+	# netadm enable -p ncp DefaultFixed
 
-4. dladm命令常用功能：
-
-	■ dladm rename-link changes the name of a datalink.
-	■ dladm show-link displays existing datalinks in the system.
-	■ dladm show-phys displays physical attributes of datalinks.
-	■ dladm delete-phys deletes a datalink.
-	■ dladm show-linkprop displays the properties that are associated with the datalink.
-	■ dladm set-linkprop sets specified datalink properties.
-	■ dladm reset-linkprop restores properties to their default settings.
-	■ dladm show-ether displays Ethernet parameter settings of a datalink
 
 5. 使用dladm重命名一个网卡
 
@@ -48,6 +42,7 @@ Solaris 11 network management
 	b. 如果要重命名的网卡已经配置了IP地址，需要先删除：
 
 	# ipadm delete-ip net0
+	
 	c. 重命名网卡：
 	# dladm rename-link net0 oldnet0
 	# dladm rename-link net1 net0
@@ -68,68 +63,196 @@ Solaris 11 network management
 
 7. 给网卡配置IP地址
 
+		dladm show-phys  #查看物理网卡
+		dladm show-link  #查看数据链路及其对应网卡
+		ipadm show-if    #查看当前已经配置的接口（和物理网卡不是一个概念，这个是协议层的接口，如IP层的接口）
+
+		ipadm create-ip $interface  
+			#如果要配置的网卡没有对应的IP层接口，则需要先创建一个，否则是无法为网卡配置IP地址的
+			# 此名称应该和网卡的链路层名称一致
+
+		最后配置IP地址：
+		# ipadm create-addr -T address-type -a address/prefixlen 	addrobj
+
+		如：
+		# ipadm create-addr -T static  		-a 192.168.84.3/24 		net0/v4static
+		
+		其中：
+
+		address-type: 
+		Specifies the type of IP address that is assigned to the interface, which is one
+		of the following: static, dhcp, or addrconf. Addrconf refers to
+		automatically generated IPv6 addresses.
 
 
-
-dladm show-phys  #查看物理网卡
-dladm show-link  #查看数据链路及其对应网卡
-ipadm show-if    #查看当前已经配置的接口（和物理网卡不是一个概念，这个是协议层的接口，如IP层的接口）
-ipadm create-ip $interface  #如果要配置的网卡没有对应的IP层接口，则需要先创建一个，否则是无法为网卡配置IP地址的
-
-最后配置IP地址：
-# ipadm create-addr -T address-type -a address/prefixlen addrobj
+		address:
+		Specifies the IP address to configure on the interface. You can specify either
+		just a local address, or both a local address and a remote address in the case
+		of tunnel configuration. Typically, you assign only a local address. In this
+		case, you specify the address directly with the -a option, such as: -a address.
+		The address is automatically considered a local address.
 
 
-其中：
+		interface 
+		refers to the IP interface to which the address is assigned. The
+		interface variable must reflect the name of the datalink on which the IP
+		interface is configured.
 
-address-type: 
-Specifies the type of IP address that is assigned to the interface, which is one
-of the following: static, dhcp, or addrconf. Addrconf refers to
-automatically generated IPv6 addresses.
+		addrobj
+		Specifies an identifier for the unique IP address or set of addresses that is
+		used in the system. The addresses can be either IPv4 or IPv6 types. The
+		identifier uses the format interface/user_specified_string.
 
+		查看接口：
+		# ipadm show-if [interface]
 
-address:
-Specifies the IP address to configure on the interface. You can specify either
-just a local address, or both a local address and a remote address in the case
-of tunnel configuration. Typically, you assign only a local address. In this
-case, you specify the address directly with the -a option, such as: -a address.
-The address is automatically considered a local address.
-
-
-interface 
-refers to the IP interface to which the address is assigned. The
-interface variable must reflect the name of the datalink on which the IP
-interface is configured.
-
-addrobj
-Specifies an identifier for the unique IP address or set of addresses that is
-used in the system. The addresses can be either IPv4 or IPv6 types. The
-identifier uses the format interface/user_specified_string.
-
-查看接口：
-# ipadm show-if [interface]
-
-查看地址：
-# ipadm show-addr [addrobj]
+		查看地址：
+		# ipadm show-addr [addrobj]
 
 
+8. 配置默认网关
+
+	route -p add default 192.168.84.1
+	
+	
+================== ipadm 常用命令 =======================
 ipadm show-* [other-arguments] [interface]
-■ To obtain interface information, use ipadm show-if.
-■ To obtain address information, use ipadm show-addr.
-■ To obtain information about a specific interface property, use ipadm show-ifprop.
-■ To obtain information about a specific address property, use ipadm show-addrprop
+		■ To obtain interface information, use ipadm show-if.
+		■ To obtain address information, use ipadm show-addr.
+		■ To obtain information about a specific interface property, use ipadm show-ifprop.
+		■ To obtain information about a specific address property, use ipadm show-addrprop
+
+	
+
+ipadm set-addrprop -t -p prefixlen=8 net3/v4
 
 
 
 
+================  dladm命令常用功能 ======================
+
+	■ dladm rename-link changes the name of a datalink.
+	■ dladm show-link displays existing datalinks in the system.
+	■ dladm show-phys displays physical attributes of datalinks.
+	■ dladm delete-phys deletes a datalink.
+	■ dladm show-linkprop displays the properties that are associated with the datalink.
+	■ dladm set-linkprop sets specified datalink properties.
+	■ dladm reset-linkprop restores properties to their default settings.
+	■ dladm show-ether displays Ethernet parameter settings of a datalink
 
 
+	
+	
+	========================= IPMP =======================
+	
+	
+	IP networkmultipathing (IPMP) provides physical interface failure detection, transparent
+network access failover, and packet load spreading for systems withmultiple interfaces that are
+connected to a particular local area network or LAN.
+
+To use IPMP, make sure that the DefaultFixed profile is enabled on the system. 
+
+With IPMP, one ormore IP interfaces can be configured into an IPMP group. The group
+functions like an IP interface with data addresses to send or receive network traffic. If an
+underlying interface in the group fails, the data addresses are redistributed among the
+remaining underlying active interfaces in the group. Thus, the group maintains network
+connectivity despite an interface failure. With IPMP, network connectivity is always available,
+provided that a minimum of one interface is usable for the group.
+
+Additionally, IPMP improves overall network performance by automatically spreading out
+outbound network traffic across the set of interfaces in the IPMP group. This process is called
+outbound load spreading. The system also indirectly controls inbound load spreading by
+performing source address selection for packets whose IP source address was not specified by
+the application.However, if an application has explicitly chosen an IP source address, then the
+system does not vary that source address.
+
+Multiple IPMP groups on the same link layer (L2) broadcast domain are
+unsupported. A L2 broadcast domain typically maps to a specific subnet. Therefore, you
+must conigure only one IPMP group per subnet.
 
 
+Comparing IPMP and Link Aggregation
+IPMP and link aggregation are different technologies to achieve improved network
+performance as well as maintain network availability. In general, you deploy link aggregation to
+obtain better network performance, while you use IPMP to ensure high availability.
+
+ == Solaris 11.3 ===
+ The following features differentiate the current IPMP implementation from the previous
+implementation:
+
+■ An IPMP group is represented as an IPMP IP interface. This interface is treated just like any
+other interface on the IP layer of the networking stack. All IP administrative tasks, routing
+tables, Address Resolution Protocol (ARP) tables, firewall rules, and other IP-related
+procedures work with an IPMP group by referring to the IPMP interface.
+
+■ The system becomes responsible for the distribution of data addresses among underlying
+active interfaces. In the previous IPMP implementation, the administrator initially
+determines the binding of data addresses to corresponding interfaces when the IPMP group
+is created. In the current implementation, when the IPMP group is created, data addresses
+belong to the IPMP interface as an address pool. The kernel then automatically and
+randomly binds the data addresses to the underlying active interfaces of the group.
+
+■ The ipmpstat tool is introduced as the principal tool to obtain information about IPMP
+groups. This command provides information about all aspects of the IPMP coniguration,
+such as the underlying IP interfaces of the group, test and data addresses, types of failure
+detection being used, and which interfaces have failed. The ipmpstat functions, the options
+you can use, and the output each option generates are all described in “Monitoring IPMP
+Information” on page 296.
+
+■ The IPMP interface can be assigned a customized name to identify the IPMP groupmore
+easily within your network setup. For the procedures to conigure IPMP groups with
+customized names, see any procedure that describes the creation of an IPMP group in
+“Coniguring IPMP Groups” on page 279.
 
 
+Types of FailureDetection in IPMP
+The in.mpathd daemon handles the following types of failure detection:
+■ Probe-based failure detection, of two types:
+	■ No test addresses are conigured (transitive probing).
+	■ Test addresses are conigured.
+■ Link-based failure detection, if supported by theNIC driver
 
 
+Probe-Based FailureDetection
 
+Probe-based failure detection consists of using ICMP probes to check whether an interface has
+failed. The implementation of this failure detection method depends on whether test addresses
+are used or not.
+Probe-Based FailureDetectionWithout Using Test Addresses
+With no test addresses, this method is implemented by using two types of probes:
+	■ ICMP probes
+ICMP probes are sent by the active interfaces in the group to probe targets that are defined
+in the routing table. An active interface is the underlying interface that can receive inbound
+IP packets that are addressed to the interface's link layer (L2) address. The ICMP probe uses
+the data address as the probe's source address. If the ICMP probe reaches its target and gets a
+response from the target, then the active interface is operational.
 
+	■ Transitive probes
+Transitive probes are sent by the alternate interfaces in the group to probe the active
+interface. An alternate interface is an underlying interface that does not actively receive any
+inbound IP packets.
 
+For example, consider an IPMP group that consists of four underlying interfaces. The group
+is configured with one data address but no test addresses. In this configuration, outbound
+packets can use all the underlying interfaces.However, inbound packets can only be
+received by the interface to which the data address is bound. The remaining three
+underlying interfaces that cannot receive inbound packets are the alternate interfaces.
+If an alternate interface can successfully send a probe to an active interface and receive a
+response, then the active interface is functional, and by inference, so is the alternate interface
+that sent the probe.
+
+Link-Based FailureDetection
+
+Link-based failure detection is always enabled, provided that the interface supports this type of
+failure detection.
+
+To determine whether a third-party interface supports link-based failure detection, use the
+ipmpstat -i command. If the output for a given interface includes an unknown status for its
+LINK column, then that interface does not support link-based failure detection. Refer to the
+manufacturer's documentation for more specific information about the device.
+
+These network drivers that support link-based failure detection monitor the interface's link
+state and notify the networking subsystem when that link state changes.When notified of a
+change, the networking subsystem either sets or clears the RUNNING lag for that interface, as
+appropriate. If the in.mpathd daemon detects that the interface's RUNNING lag has been cleared,
+the daemon immediately fails the interface.
