@@ -72,3 +72,56 @@ sdcadm health
 #Step 10: Test! It's good to at minimum do a:
 
 # docker run -it ubuntu
+
+
+
+============================ docker client setup output =========================
+acheng@iris:~$ sdc-docker/tools/sdc-docker-setup.sh -k
+SDC CloudAPI URL [https://us-east-1.api.joyent.com]: https://cloudapi.masan.keda.local
+SDC account: acheng
+SSH private key [/home/acheng/.ssh/id_rsa]: 
+
+Setting up Docker client for SDC using:
+    CloudAPI:        https://cloudapi.masan.keda.local
+    Account:         acheng
+    Key:             /home/acheng/.ssh/id_rsa
+
+If you have a pass phrase on your key, the openssl command will
+prompt you for your pass phrase now and again later.
+
+Verifying CloudAPI access.
+CloudAPI access verified.
+
+Generating client certificate from SSH private key.
+Wrote certificate files to /home/acheng/.sdc/docker/acheng
+
+Get Docker host endpoint from cloudapi.
+Docker service endpoint is: tcp://192.168.3.34:2376
+
+* * *
+Success. Set your environment as follows: 
+
+    export DOCKER_CERT_PATH=/home/acheng/.sdc/docker/acheng
+    export DOCKER_HOST=tcp://192.168.3.34:2376
+    export DOCKER_CLIENT_TIMEOUT=300
+    export COMPOSE_HTTP_TIMEOUT=300
+    unset DOCKER_TLS_VERIFY
+    alias docker="docker --tls"
+
+Your Docker host is not a DNS name, but an IP. If you want to run docker
+with TLS verification, you can configure to use a 'my.triton' DNS
+name as follows (use this instead of the setup block above):
+
+    sudo sed -e '$G; $s/$/192.168.3.34 my.triton/;' -i.bak /etc/hosts
+    export DOCKER_CERT_PATH=/home/acheng/.sdc/docker/acheng
+    export DOCKER_HOST=tcp://my.triton:2376
+    export DOCKER_TLS_VERIFY=1
+    export DOCKER_CLIENT_TIMEOUT=300
+    export COMPOSE_HTTP_TIMEOUT=300
+
+Then you should be able to run 'docker info' and see your account
+name 'SDCAccount: acheng' in the output.
+
+Note: If you receive any docker compose warning about the
+DOCKER_CLIENT_TIMEOUT environment variable being deprecated,
+simply unset it and remove it from env.sh.
