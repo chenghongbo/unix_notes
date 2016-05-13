@@ -52,28 +52,28 @@ An aggregation without a name, @, may be used for D programs (especially one-
 liners) that use only one aggregation and so don’t need a name to differentiate
 them.
 
-Function			Arguments			Result
+Function	Arguments		Result
 --------------------------------------------------------------------------------------------------------
-count				None				The number of times called.
+count		None			The number of times called.
 --------------------------------------------------------------------------------------------------------
-sum					Scalar				The total value.
+sum		Scalar			The total value.
 --------------------------------------------------------------------------------------------------------
-avg					Scalar				The arithmetic average.
+avg		Scalar			The arithmetic average.
 --------------------------------------------------------------------------------------------------------
-min					Scalar				The smallest value.
+min		Scalar			The smallest value.
 --------------------------------------------------------------------------------------------------------
-max					Scalar				The largest value.
+max		Scalar			The largest value.
 --------------------------------------------------------------------------------------------------------
-stddev				Scalar				The standard deviation.
+stddev		Scalar			The standard deviation.
 --------------------------------------------------------------------------------------------------------
-lquantize			Scalar,				A linear frequency distribution, sized by the specified 
-					lower bound,		range, of the values of the specified expressions. Incre-
-					upper bound,		ments the value in the highest bucket that is less than the 
-					step				specified expression. 
+lquantize	Scalar,			A linear frequency distribution, sized by the specified 
+		lower bound,		range, of the values of the specified expressions. Incre-
+		upper bound,		ments the value in the highest bucket that is less than the 
+		step			specified expression. 
 --------------------------------------------------------------------------------------------------------
-quantize			Scalar				A power-of-two frequency distribution of the values of 
-										the specified expressions. Increments the value in the 
-										highest power-of-two bucket that is less than the specified expression. 
+quantize	Scalar			A power-of-two frequency distribution of the values of the 
+					specified expressions. Increments the value in the highest 
+					power-of-two bucket that is less than the specified expression. 
 --------------------------------------------------------------------------------------------------------
 
 The trunc() function can either completely clear an aggregation, leaving no keys
