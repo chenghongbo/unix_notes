@@ -26,8 +26,117 @@ How to specify a probe?
 	semantic meaning, such as BEGIN or END.
 	This name can be referenced in a D program by using the built-in variable probename.
 
+Associative Arrays
+Associative arrays can contain multiple values accessed via a key. They are
+declared with an assignment of the following form:
+
+	name[key] = expression;
+
+The key may be a comma-separated list of expressions. The example
+
+	a[123, "foo"] = 456;
+
+declares a key of the integer 123 and the string foo, storing the integer value 456.
+Associative arrays have the same issues as scalars, with the potential to become
+corrupted if multiple CPUs modify the same key/value simultaneously.
+
+==== Thread local variables ====
+
+Thread-local variables are stored with the current thread of execution. They have
+this prefix:
+
+	self->
+
+To declare a thread-local variable, set a value. The example
+
+	self->x = 1;
+
+declares a thread-local variable, x, to contain the value 1.
+
+If thread-local variables are set but not freed after use, memory may be con-
+sumed needlessly while those threads still exist on the system. Once the thread is
+destroyed, the thread-local variables are freed.
+
+Thread-local variables should be used in preference to scalars and associative
+arrays wherever possible to avoid the possibility of multiple CPUs writing to the
+same D variable location and the contents becoming corrupted.
+
+==== Clause local variables ====
+
+Clause-local variables are for use within a single of action group { }. They have
+this prefix:
+
+	this->
+
+To declare a clause-local variable, set a value. The example
+
+	this->y = 1;
+
+declares a clause-local variable, y, to contain the value 1.
+
+Clause-local variables do not need to be freed; this is done automatically when
+the probe finishes executing all actions associated with that probe. If there are
+multiple probe { action } groups for the same probe, clause-local variables can
+be accessed across the action groups.
+
+They should be used for temporary variables within an action, because they
+have the lowest performance cost of all the variable types.
+
+==== Built-in ====
+
+A variety of built-in variables are available as scalar globals.
+
+Variable Name	Type		Description
+arg0...arg9	uint64_t	Probe arguments; content is provider-specific
+args[] 		*		Typed probe arguments; content is provider-specific
+cpu		processorid_t	CPU ID of the current CPU
+curpsinfo	psinfo_t	Process state info for the current thread
+curthread	kthread_t	Operating system internal kernel thread structure for the current thread
+errno		int		Error value from the last system call
+execname	string		The name of the current process
+pid		pid_t		Process ID for current process
+ppid		pid_t		Parent process ID for current process
+......
+
+
+It is common to use built-in variables in predicates in order to gather data for
+specific processes, threads, or events of interest. The example
+
+	/execname == "ls" /
+
+is a predicate that will cause the actions in the clause to be executed only when the
+process name is ls.
+
+==== Macros  =====
+
+DTrace provides macro variables including the ones presented in below table.
+For example, a D script called file.d could match the $target process ID in a
+predicate:
+
+	/pid == $target/
+
+which is provided to the D script at the command line,
+
+      	./file.d -p 123
+
+so the predicate will fire the action clause only if the specified process ID, 123, is
+on-CPU.
+
+Variable Name	Type			Description
+$target		pid_t			Process ID specified using -p PID or -c command
+$1..$N		Integer or string	Command-line arguments to dtrace(1M)
+$$1..$$N	String (forced)		Command-line arguments to dtrace(1M)
+
+==== External Variables ====
+
+External variables are defined by the operating system (external to DTrace) and
+accessed by prefixing the kernel variable name with a backquote. The kernel inte-
+ger variable k could be printed using this:
+
+	printf("k: %d\n",`k);
 
 ====  Aggregations   ====
+
 Aggregations are a special variable type used to summarize data. They are prefixed with an at (@) sign 
 and are populated by aggregating functions.
 
@@ -116,10 +225,11 @@ The aggregations must share the same key to be printed in the same printa().
 By default, sorting is in ascending order by the first aggregation. Several options
 exist for changing the default sort behavior and for picking which aggregation to
 sort by.
-aggsortkey: Sort by key order; any ties are broken by value.
-aggsortrev: Reverse sort.
-aggsortpos: Position of the aggregation to use as primary sort key.
-aggsortkeypos: Position of key to use as primary sort key.
+
+	aggsortkey: Sort by key order; any ties are broken by value.
+	aggsortrev: Reverse sort.
+	aggsortpos: Position of the aggregation to use as primary sort key.
+	aggsortkeypos: Position of key to use as primary sort key.
 
 The aggregation sort options can be used in combination.
 
@@ -127,6 +237,7 @@ The aggregation sort options can be used in combination.
 DTrace actions may include built-in functions to print and process data and to
 modify the execution of the program or the system (in a carefully controlled man-
 ner). Several key functions are listed here.
+
 Actions that print output (for example, trace() and printf()) will also print
 default output columns from DTrace (CPU ID, probe ID, probe name), which can
 be suppressed with quiet mode (see “Options” section). The output may also
@@ -170,7 +281,7 @@ Types include the following.
 
 For example,
 
-printf("%-8d %32.32s %d bytes\n", a, b, c);
+	printf("%-8d %32.32s %d bytes\n", a, b, c);
 
 prints the a variable as an integer in an 8-character-wide, left-justified column; the
 b variable as a string in a 32-character-wide, right-justified column, and with no
@@ -179,7 +290,7 @@ line character \n.
 
 To print a region of memory, the tracemem() function can be used. The example
 
-tracemem(p, 256);
+	tracemem(p, 256);
 
 prints 256 bytes starting at the p pointer, in hexadecimal. If tracemem() is given
 a data type it can recognize, such as a NULL-terminated string, it will print that in
@@ -188,20 +299,20 @@ a meaningful way (not as a hex dump).
 DTrace operates in the kernel address space. To access data from the user-land
 address space associated with a process, copyin() can be used. The example
 
-a = copyin(p, 256);
+	a = copyin(p, 256);
 
 copies 256 bytes of data from the p user-land pointer into the variable a. The buf-
 fer pointers on the  read(2) and  write(2) syscalls are examples of user-land
 pointers, so that
 
-syscall::write:entry { w = copyin(arg0, arg2); }
+	syscall::write:entry { w = copyin(arg0, arg2); }
 
 will copy the data from write(2) into the w variable.
 
 
 To inform DTrace that a pointer is a string, use stringof(). The example
 
-printf("%s", stringof(p));
+	printf("%s", stringof(p));
 
 treats the p pointer variable as a string and prints it out using printf().
 
@@ -210,7 +321,7 @@ stringof()works only on pointers in the kernel address space; for user-land
 pointers, use copyinstr(). For example, the first argument to the open(2) sys-
 call is a user-land pointer to the path; it can be printed using the following:
 
-syscall::open:entry { trace(copyinstr(arg0)); }
+	syscall::open:entry { trace(copyinstr(arg0)); }
 
 
 The stack() action fetches the current kernel stack back trace. Used alone,
@@ -228,4 +339,5 @@ It can also be used as keys for aggregations. For example, the action
 
 counts invocations by stack trace; that is, when the aggregation is printed, a list of
 stack traces will be shown along with the counts for each stack, in ascending order.
+
 To print them in printa() statements, use the %k format directive.
