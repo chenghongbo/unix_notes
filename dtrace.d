@@ -106,3 +106,126 @@ printa("%10d %-32s %@8d\n", @a);
 which formats the key into columns: x, 10 characters wide and right-justified; y, 32
 characters wide and left-justified. The aggregation value for each key is printed
 using the %@ format code, eight characters wide and right-justified.
+
+
+The printa() function can also print multiple aggregations:
+
+printa("%10s %@8d %@8d\n", @a, @b);
+
+The aggregations must share the same key to be printed in the same printa().
+By default, sorting is in ascending order by the first aggregation. Several options
+exist for changing the default sort behavior and for picking which aggregation to
+sort by.
+aggsortkey: Sort by key order; any ties are broken by value.
+aggsortrev: Reverse sort.
+aggsortpos: Position of the aggregation to use as primary sort key.
+aggsortkeypos: Position of key to use as primary sort key.
+
+The aggregation sort options can be used in combination.
+
+
+DTrace actions may include built-in functions to print and process data and to
+modify the execution of the program or the system (in a carefully controlled man-
+ner). Several key functions are listed here.
+Actions that print output (for example, trace() and printf()) will also print
+default output columns from DTrace (CPU ID, probe ID, probe name), which can
+be suppressed with quiet mode (see “Options” section). The output may also
+become shuffled on multi-CPU systems because of the way DTrace collects per-
+CPU buffers and prints them out, and a time stamp field can be included in the
+output for postsorting, if accurate; chronological order is required.
+
+
+The trace() action takes a single argument and prints it: 
+
+trace(x)
+
+This prints the variable x, which may be an integer, string, or pointer to binary
+data. DTrace chooses an appropriate method for printing, which may include print-
+ing hexadecimal (hex dump).
+
+
+Variables can be printed with formatting using printf(), based on the C version:
+
+printf(format, arguments ...)
+
+The format string can contain regular text, plus directives, to describe how to
+format the remaining arguments. Directives comprise the following.
+
+	%: To indicate a format directive.
+	-: (Optional.) To change justification from right to left.
+	width: (Optional.) Width of column as an integer.  Text will overflow if needed.
+	.length: (Optional.) To truncate to the length given.
+	type: Covered in a moment.
+	
+Types include the following.
+	a: Convert pointer argument to kernel symbol name.
+	A: Convert pointer argument to user-land symbol name.
+	d: Integer (any size).
+	c: Character.
+	f: Float.
+	s: String.
+	S: Escaped string (binary character safe).
+	u: Unsigned integer (any size).
+	Y: Convert nanoseconds since epoch (walltimestamp) to time string.
+
+For example,
+
+printf("%-8d %32.32s %d bytes\n", a, b, c);
+
+prints the a variable as an integer in an 8-character-wide, left-justified column; the
+b variable as a string in a 32-character-wide, right-justified column, and with no
+overflow; and the c variable as an integer, followed by the text bytes and the new
+line character \n.
+
+To print a region of memory, the tracemem() function can be used. The example
+
+tracemem(p, 256);
+
+prints 256 bytes starting at the p pointer, in hexadecimal. If tracemem() is given
+a data type it can recognize, such as a NULL-terminated string, it will print that in
+a meaningful way (not as a hex dump).
+
+DTrace operates in the kernel address space. To access data from the user-land
+address space associated with a process, copyin() can be used. The example
+
+a = copyin(p, 256);
+
+copies 256 bytes of data from the p user-land pointer into the variable a. The buf-
+fer pointers on the  read(2) and  write(2) syscalls are examples of user-land
+pointers, so that
+
+syscall::write:entry { w = copyin(arg0, arg2); }
+
+will copy the data from write(2) into the w variable.
+
+
+To inform DTrace that a pointer is a string, use stringof(). The example
+
+printf("%s", stringof(p));
+
+treats the p pointer variable as a string and prints it out using printf().
+
+
+stringof()works only on pointers in the kernel address space; for user-land
+pointers, use copyinstr(). For example, the first argument to the open(2) sys-
+call is a user-land pointer to the path; it can be printed using the following:
+
+syscall::open:entry { trace(copyinstr(arg0)); }
+
+
+The stack() action fetches the current kernel stack back trace. Used alone,
+
+	stack()
+
+prints out the stack trace when the probe fires, with a line of output per stack
+frame. To print a maximum of five stack frames only, use this:
+
+	stack(5)
+
+It can also be used as keys for aggregations. For example, the action
+
+	@a[stack()] = count();
+
+counts invocations by stack trace; that is, when the aggregation is printed, a list of
+stack traces will be shown along with the counts for each stack, in ascending order.
+To print them in printa() statements, use the %k format directive.
