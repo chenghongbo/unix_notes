@@ -26,7 +26,43 @@ How to specify a probe?
 	semantic meaning, such as BEGIN or END.
 	This name can be referenced in a D program by using the built-in variable probename.
 
-Associative Arrays
+==== D program structure ====
+
+	probes /predicate/ { actions }
+	probes /predicate/ { actions }
+	...
+
+When probes fire, the predicate test determines whether to execute the actions
+(also called the clause), which are a series of statements. Without the predicate,
+the actions are always executed. Without a predicate or an action, a default line of
+output is printed to indicate that the probe fired. The only valid combinations are
+the following:
+
+	probes
+	probes { actions }
+	probes /predicate/ { actions }
+
+The actions may be left blank, but when doing so, the braces are still necessary.
+
+
+==== predicates ====
+
+Instead of conditional statements (if/then/else), DTrace has predicates. Predi-
+cates evaluate their expression and, if true, execute the action statements that fol-
+low in the clause. The expression is written in D, similar to the C language. For
+example, the predicate
+
+	/uid == 101/
+
+will execute the action that follows only if the uid variable (current user ID) is
+equal to 101.
+
+==== Actions
+Actions can be a single statement or multiple statements separated by semicolons:
+
+	{ action one; action two; action three }
+
+==== Associative Arrays
 Associative arrays can contain multiple values accessed via a key. They are
 declared with an assignment of the following form:
 
