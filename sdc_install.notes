@@ -1,0 +1,20 @@
+
+HOW TO INSTALL SDC (OR TRITON ELASTIC CONTAINER INFRASTRUCTURE) OPEN SOURCE EDITION
+0. what you need
+	a USB key of 8GB or more
+	one headnode server (X86_64, VX-T support, two NICs, 16GB RAM minimal, 10GB SAS/SATA disk minimal)
+	one or more compute node server
+
+1. preparation
+
+	Download latest usg img:
+		https://us-east.manta.joyent.com/Joyent_Dev/public/SmartDataCenter/usb-latest.tgz
+
+	uncompress the tar ball
+
+	write the img file to USB 
+		Windows: https://docs.joyent.com/private-cloud/install/installation-media/windows
+		Linux: https://docs.joyent.com/private-cloud/install/installation-media/linux
+		MacOS: https://docs.joyent.com/private-cloud/install/installation-media/mac-osx
+		SmartOS: https://docs.joyent.com/private-cloud/install/installation-media/smartos
+
