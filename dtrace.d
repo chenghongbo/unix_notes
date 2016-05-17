@@ -2,7 +2,26 @@ What is Dtrace?
 What can it do for us?
 which OS is Dtrace available on?
 
-What is a probe?
+==== D program structure ====
+
+	probes /predicate/ { actions }
+	probes /predicate/ { actions }
+	...
+
+When probes fire, the predicate test determines whether to execute the actions
+(also called the clause), which are a series of statements. Without the predicate,
+the actions are always executed. Without a predicate or an action, a default line of
+output is printed to indicate that the probe fired. The only valid combinations are
+the following:
+
+	probes
+	probes { actions }
+	probes /predicate/ { actions }
+
+The actions may be left blank, but when doing so, the braces are still necessary.
+
+==== What is a probe ====
+
 A probe that has a module and function as part of its name is known as an anchored probe, and one that does not is known as unanchored.
 
 How to specify a probe?
@@ -26,24 +45,6 @@ How to specify a probe?
 	semantic meaning, such as BEGIN or END.
 	This name can be referenced in a D program by using the built-in variable probename.
 
-==== D program structure ====
-
-	probes /predicate/ { actions }
-	probes /predicate/ { actions }
-	...
-
-When probes fire, the predicate test determines whether to execute the actions
-(also called the clause), which are a series of statements. Without the predicate,
-the actions are always executed. Without a predicate or an action, a default line of
-output is printed to indicate that the probe fired. The only valid combinations are
-the following:
-
-	probes
-	probes { actions }
-	probes /predicate/ { actions }
-
-The actions may be left blank, but when doing so, the braces are still necessary.
-
 
 ==== predicates ====
 
@@ -62,6 +63,7 @@ Actions can be a single statement or multiple statements separated by semicolons
 
 	{ action one; action two; action three }
 
+------------------------------------------  variables  ---------------------------------------
 ==== Associative Arrays
 Associative arrays can contain multiple values accessed via a key. They are
 declared with an assignment of the following form:
@@ -377,3 +379,94 @@ counts invocations by stack trace; that is, when the aggregation is printed, a l
 stack traces will be shown along with the counts for each stack, in ascending order.
 
 To print them in printa() statements, use the %k format directive.
+
+
+
+
+
+
+
+==============================   checking system view ==============================
+
+About CPU utilization
+
+A specific example of this is memory bus I/O. CPU “load” and “store” instruc-
+tions may stall while on-CPU, waiting for the memory bus to complete a data
+transfer. 
+
+Since these stall cycles occur during a CPU instruction, they’re treated as
+utilized, although perhaps not in the expected way (utilized while waiting!).
+The level of parallelism of the workload is also a factor; 
+
+a single-threaded application may consume 100 percent of a single CPU, leaving 
+other CPUs virtually idle. In such a scenario, on systems with a large number 
+of CPUs, tools that aggregate utilization would indicate very low systemwide 
+CPU utilization, potentially steering you away from looking more closely at CPUs. 
+
+A highly threaded workload with lock contention in the application may show many 
+CPUs running at 100 percent utilization, but most of the threads are spinning on 
+locks, rather than doing the work they were designed to do. The key point is that 
+CPU utilization alone is not sufficient to determine to what extent the CPUs 
+themselves are the real performance problem.
+
+It is instructive to know exactly what the CPUs are doing—whether that is the
+processing of instructions or memory I/O stall cycles—and for what applications or
+kernel software.
+
+
+CPU related Providers:
+
+Provider		Description
+profile, tick 		These providers allow for time-based data collection and 
+			are very useful for kernel and user CPU profiling.
+
+sched			Observing scheduling activity is key to understanding CPU 
+			usage on loaded systems.
+
+proc			The proc provider lets you observe key process/thread events.
+
+sysinfo			This is important for tracking systemwide events that relate 
+			to CPU usage.  
+
+fbt 			The function boundary tracing provider can be used to examine 
+			CPU usage by kernel function.
+
+pid 			The pid provider enables instrumenting unmodified user code 
+			for drilling down on application profiling.
+
+lockstat 		lockstat is both a DTrace consumer (lockstat(1M)) and a special 
+			provider used for observing kernel locks and kernel profiling.
+
+syscall 		Observing system calls is generally a good place to start, 
+			because system calls are where applications meet the kernel, 
+			and they can provide insight as to what the workload is doing.
+
+plockstat 		This provides statistics on user locks. It can identify lock 
+			contention in application code.
+
+The profile probe has two arguments: arg0 and arg1. arg0 is the program
+counter (PC) of the current instruction if the CPU is running in the kernel, and
+arg1 is the PC of the current instruction if the CPU is executing in user mode.
+Thus, the test /arg0/ (arg0 != 0) equates to “is the CPU executing in the ker-
+nel?” and /arg1/ (arg1 != 0) equates to “is the CPU executing in user mode?”
+
+Which processes are on-CPU?
+	dtrace -n 'profile-997hz { @[pid, execname] = count(); }'
+
+Which processes are on-CPU, running user code?
+	dtrace -n 'profile-997hz /arg1/ { @[pid, execname] = count(); }'
+
+What are the top user functions running on-CPU (%usr time)?
+	dtrace -n 'profile-997hz /arg1/ { @[execname, ufunc(arg1)] = count(); }'
+
+What are the top kernel functions running on-CPU (%sys time)?
+	dtrace -n 'profile-997hz /arg0/ { @[func(arg0)] = count(); }'
+
+What are the top five kernel stack traces on the CPU (shows why)?
+	dtrace -n 'profile-997hz { @[stack()] = count(); } END { trunc(@, 5); }'
+
+What are the top five user stack traces on the CPU (shows why)?
+	dtrace -n 'profile-997hz { @[ustack()] = count(); } END { trunc(@, 5); }'
+
+What threads are on-CPU, counted by their thread name (FreeBSD)?
+	dtrace -n 'profile-997 { @[stringof(curthread->td_name)] = count(); }'
