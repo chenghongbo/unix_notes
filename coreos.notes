@@ -1,0 +1,4 @@
+release channel specified in /etc/coreos/update.conf : alpha beta stable
+manual check: update_engine_client -check_for_update
+
+release version in /etc/os-release
