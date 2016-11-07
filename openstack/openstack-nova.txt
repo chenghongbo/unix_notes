@@ -1,0 +1,90 @@
+
+#####################################################
+#
+#  install and configure compute service
+#
+#####################################################
+
+Configure the first interface as the management interface:
+
+IP address: 10.0.0.31
+
+Network mask: 255.255.255.0 (or /24)
+
+Default gateway: 10.0.0.1
+
+## ---  Edit the /etc/network/interfaces
+# The provider network interface
+auto INTERFACE_NAME
+iface  INTERFACE_NAME inet manual
+up ip link set dev $IFACE up
+down ip link set dev $IFACE down
+
+
+## --- Edit the /etc/hosts
+# controller
+10.0.0.11       controller
+
+# compute1
+10.0.0.31       compute1
+
+# block1
+10.0.0.41       block1
+
+# object1
+10.0.0.51       object1
+
+# object2
+10.0.0.52       object2
+
+##  -----------------------------------------------------
+
+# apt-get install nova-compute
+
+## /etc/nova/nova.conf
+[DEFAULT]
+...
+transport_url = rabbit://openstack:RABBIT_PASS@controller
+auth_strategy = keystone
+my_ip = MANAGEMENT_INTERFACE_IP_ADDRESS
+use_neutron = True
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+[keystone_authtoken]
+...
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = nova
+password = NOVA_PASS
+
+[vnc]
+...
+enabled = True
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = $my_ip
+novncproxy_base_url = http://controller:6080/vnc_auto.html
+
+[glance]
+...
+api_servers = http://controller:9292
+
+[oslo_concurrency]
+...
+lock_path = /var/lib/nova/tmp
+
+
+## if $ egrep -c '(vmx|svm)' /proc/cpuinfo
+## returns zero, then:
+## /etc/nova/nova-compute.conf
+[libvirt]
+...
+virt_type = qemu
+
+# service nova-compute restart
+
+

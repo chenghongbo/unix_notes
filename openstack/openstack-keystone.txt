@@ -1,0 +1,125 @@
+	## Create the keystone database:
+
+mysql> CREATE DATABASE keystone;
+
+	## Grant proper access to the keystone database:
+
+mysql> GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+  IDENTIFIED BY 'KEYSTONE_DBPASS';
+mysql> GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+  IDENTIFIED BY 'KEYSTONE_DBPASS';
+
+# apt-get install keystone
+
+	## Edit the /etc/keystone/keystone.conf file and complete the following actions:
+
+	## In the [database] section, configure database access:
+
+[database]
+...
+connection = mysql+pymysql://keystone:KEYSTONE_DBPASS@controller/keystone
+Replace KEYSTONE_DBPASS with the password you chose for the database.
+
+	## In the [token] section, configure the Fernet token provider:
+
+[token]
+...
+provider = fernet
+
+	## Populate the Identity service database:
+
+# su -s /bin/sh -c "keystone-manage db_sync" keystone
+
+	## Initialize Fernet key repositories:
+
+# keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+# keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+	
+	## Bootstrap the Identity service:
+
+# keystone-manage bootstrap --bootstrap-password ADMIN_PASS \
+  --bootstrap-admin-url http://controller:35357/v3/ \
+  --bootstrap-internal-url http://controller:35357/v3/ \
+  --bootstrap-public-url http://controller:5000/v3/ \
+  --bootstrap-region-id RegionOne
+
+
+#######################################
+#
+# Configure the Apache HTTP server¶
+#
+#######################################
+
+	##Edit the /etc/apache2/apache2.conf f
+
+ServerName controller
+Finalize the installation¶
+
+	## Restart the Apache service and remove the default SQLite database:
+
+# service apache2 restart
+# rm -f /var/lib/keystone/keystone.db
+
+	## Configure the administrative account
+
+$ export OS_USERNAME=admin
+$ export OS_PASSWORD=ADMIN_PASS
+$ export OS_PROJECT_NAME=admin
+$ export OS_USER_DOMAIN_NAME=Default
+$ export OS_PROJECT_DOMAIN_NAME=Default
+$ export OS_AUTH_URL=http://controller:35357/v3
+$ export OS_IDENTITY_API_VERSION=3
+
+
+
+###################################
+#
+#  The Identity service provides authentication services for each OpenStack service. 
+#  The authentication service uses a combination of domains, projects, users, and roles.
+#
+##################################
+
+$ openstack project create --domain default \
+  --description "Service Project" service
+
+$ openstack project create --domain default \
+  --description "Demo Project" demo
+
+$ openstack user create --domain default \
+  --password-prompt demo
+
+$ openstack role create user
+
+$ openstack role add --project demo --user demo user
+
+### For security reasons, disable the temporary authentication token mechanism:
+
+### Edit the /etc/keystone/keystone-paste.ini file and remove admin_token_auth from the [pipeline:public_api], [pipeline:admin_api], and [pipeline:api_v3] sections.
+
+
+###	Edit the admin-openrc file and add the following content:
+
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=default
+export OS_PROJECT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=ADMIN_PASS
+export OS_AUTH_URL=http://controller:35357/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+
+##	Replace ADMIN_PASS with the password you chose for the admin user in the Identity service.
+
+###	Edit the demo-openrc file and add the following content:
+
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=default
+export OS_PROJECT_NAME=demo
+export OS_USERNAME=demo
+export OS_PASSWORD=DEMO_PASS
+export OS_AUTH_URL=http://controller:5000/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+##	Replace DEMO_PASS with the password you chose for the demo user in the Identity service.
+
+

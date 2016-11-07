@@ -1,0 +1,16 @@
+# apt-get install software-properties-common
+# add-apt-repository cloud-archive:newton
+
+# apt-get update && apt-get dist-upgrade
+# apt-get install python-openstackclient
+
+# -----------------------------------------
+# apt-get install chrony
+
+## ---- /etc/chrony/chrony.conf
+## ---- configure NTP_SERVER with your own 
+
+server NTP_SERVER iburst
+
+# service chrony restart
+

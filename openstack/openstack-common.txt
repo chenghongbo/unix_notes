@@ -1,0 +1,42 @@
+#######################################
+#
+#  Perform these procedures on all nodes.
+#
+#######################################
+
+# apt-get install software-properties-common
+# add-apt-repository cloud-archive:newton
+
+# apt-get update && apt-get dist-upgrade
+# apt-get install python-openstackclient
+
+############################
+#
+#  on controller nodes (NTP server)
+#
+############################
+# apt-get install chrony
+
+# -- /etc/chrony/chrony.conf
+server NTP_SERVER iburst
+
+# service chrony restart
+
+
+############################
+#
+#  on other nodes
+#
+############################
+
+# apt-get install chrony
+
+# -- /etc/chrony/chrony.conf
+
+server controller iburst
+
+# service chrony restart
+
+
+## run below command sync up time
+# chronyc sources

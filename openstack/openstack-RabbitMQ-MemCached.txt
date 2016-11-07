@@ -1,0 +1,16 @@
+# apt-get install rabbitmq-server
+
+# rabbitmqctl add_user openstack RABBIT_PASS
+
+# rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+
+##########################################################
+# apt-get install memcached python-memcache
+
+## -- Edit the /etc/memcached.conf
+## controller node ip
+
+-l 10.0.0.11
+
+# service memcached restart
+
