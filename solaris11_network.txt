@@ -147,7 +147,7 @@ ipadm set-addrprop -t -p prefixlen=8 net3/v4
 	
 	
 	IP networkmultipathing (IPMP) provides physical interface failure detection, transparent
-network access failover, and packet load spreading for systems withmultiple interfaces that are
+network access failover, and packet load spreading for systems with multiple interfaces that are
 connected to a particular local area network or LAN.
 
 To use IPMP, make sure that the DefaultFixed profile is enabled on the system. 
