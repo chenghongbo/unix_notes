@@ -45,15 +45,15 @@ option domain-name-servers 8.8.8.8, 8.8.4.4;
 default-lease-time 600;
 max-lease-time 7200;
 log-facility local7;
-subnet 10.5.5.0 netmask 255.255.255.0 {
-  range 10.5.5.26 10.5.5.130;
+subnet 10.0.0.0 netmask 255.255.255.0 {
+  range 10.0.0.26 10.0.0.130;
   option domain-name-servers 8.8.8.8;
   option domain-name "my.internal";
-  option routers 10.5.5.1;
-  option broadcast-address 10.5.5.255;
+  option routers 10.0.0.1;
+  option broadcast-address 10.0.0.255;
   default-lease-time 600;
   max-lease-time 7200;
-  next-server 10.5.5.1;
+  next-server 10.0.0.1;
   filename "pxelinux.0"; 
 }
 '
@@ -65,7 +65,7 @@ echo "$dhcpd_config" > $dhcpd_conf
 interface_config='
 auto eth1
 iface eth1 inet static
-  address 10.5.5.1
+  address 10.0.0.1
   netmask 255.255.255.0
 '
 echo "$interface_config" >> /etc/network/interfaces
