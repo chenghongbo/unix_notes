@@ -70,8 +70,12 @@ iface eth1 inet static
 '
 echo "$interface_config" >> /etc/network/interfaces
 
+systemctl disable networking
+systemctl stop networking
+
+ip addr add 10.0.0.1/24 dev eth1
 ## enable services
-for i in samba tftpd-hpa apache2 isc-dhcp-server
+for i in smbd tftpd-hpa apache2 isc-dhcp-server nfs-kernel-server
 do
 	systemctl start $i
 	systemctl enable $i
