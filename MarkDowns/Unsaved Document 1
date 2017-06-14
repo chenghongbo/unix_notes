@@ -1,0 +1,24 @@
+molecule test --destroy [always,never,passing]
+docker exec -i -t $ID /bin/bash  ## attach to a docker instance runing in background
+tar -czf archive_file.tar.gz target --exclude="*.zip" --exclude="*.war"
+
+
+=== ansible ===
+
+Tasks:
+	 contain the core logic, for example, they will have code specifications
+	to install packages, start services, manage files, and so on. If we consider a
+	role to be a movie, a task would be the protagonist.
+
+Vars:
+	and defaults provide data about your application/role, for example,
+	which port your server should run on, the path for storing the application
+	data, which user to run the service as, and so on. 
+
+handlers: 
+	like a function or method in OOP, handlers are actions that can be called (or notified, in ansible terms) when a certain event occur
+
+Files and templates:
+	provide options for managing files. 
+	Typically, the files subdirectory is used to copy over static files to destination hosts,
+	whereas templates are used to generate files with dynamic contents, with help from variables
