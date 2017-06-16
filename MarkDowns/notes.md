@@ -35,6 +35,11 @@ password='yourPass',sec=ntlm \
 \\\\epbyminw1383.minsk.epam.com\\install_VEL /mnt
 ```
 
+#### list samba users in its own database
+```shell
+pdbedit -L
+```
+
 #### show all git commits in master that aren’t in experiment 
 
 ```shell
@@ -109,6 +114,12 @@ at 10PM
 at> echo "this is just an example"
 at> ls -l ~/Documents
 ^D
+
+# use atq to view task queues
+atq
+
+# use atrm to delete task by ID
+atrm 4
 ```
 #### lsof frequently used arguments
 ```shell
@@ -138,4 +149,88 @@ lsof -p $PID
 
 # get list of processes in use by command
 lsof -t -c <co­mma­nd>
+
+# Open files within a directory
+lsof +D /path
+
+# By program name
+lsof -c apache
+
+# AND'ing selection conditions
+lsof -u www-data -c apache
+
+# NFS use
+lsof -N 
+
+# UNIX domain socket use
+lsof -U 
 ```
+
+#### bash variable substitution rules
+```shell
+
+# '${var#Pattern}' Remove from $var the 'shortest' part of $Pattern that matches the front end of $var.
+
+# '${var##Pattern}' Remove from $var the 'longest' part of $Pattern that matches the front end of $var.
+---
+
+# '${var%Pattern}' Remove from $var the shortest part of $Pattern that matches the 'back' end of $var.
+
+
+# '${var%%Pattern}' Remove from $var the longest part of $Pattern that matches the 'back' end of $var.
+
+
+#  '*' is a wildcard
+
+var=abcd-1234-defg
+echo ${var#*-*}  # result: 1234-defg
+echo ${var#*-}   # result: 1234-defg  '*' can mean nothing
+
+# ${var:pos}
+# Variable var expanded, starting from offset pos.
+
+# ${var:pos:len}
+# Expansion to a max of len characters of variable var, from offset pos. 
+path_name="/home/bozo/ideas/thoughts.for.today"
+t=${path_name:11}  ## ideas/thoughts.for.today
+echo "$path_name, with first 11 chars stripped off = $t"
+
+t=${path_name:11:5}  ## ideas
+echo "$path_name, with first 11 chars stripped off, length 5 = $t"
+# ${var/Pattern/Replacement}
+# First match of Pattern, within var replaced with Replacement.
+
+# If Replacement is omitted, then the first match of Pattern is replaced by nothing, that is, deleted.
+
+# ${var//Pattern/Replacement}
+# Global replacement. All matches of Pattern, within var replaced with Replacement.
+
+# As above, if Replacement is omitted, then all occurrences of Pattern are replaced by nothing, that is, deleted.
+
+# ${var/#Pattern/Replacement}
+# If prefix of var matches Pattern, then substitute Replacement for Pattern.
+
+# ${var/%Pattern/Replacement}
+# If suffix of var matches Pattern, then substitute Replacement for Pattern.
+
+# ${!varprefix*}, ${!varprefix@}
+# “Matches names of all previously declared variables beginning with varprefix.”
+
+xyz23=whatever
+xyz24=
+
+a=${!xyz*}         #  Expands to *names* of declared variables
+# ^ ^   ^           + beginning with "xyz".
+echo "a = $a"      #  a = xyz23 xyz24
+a=${!xyz@}         #  Same as above.
+echo "a = $a"      #  a = xyz23 xyz24
+
+echo "---"
+
+abc23=something_else
+b=${!abc*}
+echo "b = $b"      #  b = abc23
+c=${!b}            #  Now, the more familiar type of indirect reference.
+echo $c            #  something_else
+```
+
