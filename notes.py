@@ -38,6 +38,18 @@ for item in thelist:
       f.write("%s\n" % item)
 f.close()  ## write a list to file
 
+## check if file exists
+
+
+## check if an itme is file or dir
+
+
+## retrieve files in a directory
+
+
+## move a file
+
+
 ## date and time
 import time, datetime
 time.localtime()
@@ -59,6 +71,12 @@ print "Two weeks in the past is:", now + difference2
 print datetime.date(2003, 8, 6) - datetime.date(2000, 8, 6)
 #=> 1095 days, 0:00:00
 
+timediff = datetime.date(2003, 8, 6) - datetime.date(2000, 8, 6)
+## timediff is now a timedelta object
+
+int_diff = timediff.days
+## This is to get the number of days in the timedelta object
+
 ## see more in http://pleac.sourceforge.net/pleac_python/datesandtimes.html
 
 ## read user input from stdin
@@ -74,7 +92,7 @@ parser.add_argument("-q", "--quiet",action="store_false",dest="verbose",help="do
 args = parser.parse_args()
 print(args.myfilename)
 
-    """
+    """ 	
     dest: You will access the value of option with this variable
     help: This text gets displayed whey someone uses --help.
     default: If the command line argument was not specified, it will get this default value.
