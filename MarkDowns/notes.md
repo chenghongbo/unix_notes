@@ -4,6 +4,31 @@
 molecule test --destroy [always,never,passing]
 ```
 
+#### query AD using ldapsearch tool
+```shell
+ldapsearch -x -h 10.22.17.50 -D "maximo@hkld.local" -w 'P@ssw0rd'  -b "dc=hkld,dc=local" -s sub "(&(objectCategory=person)(objectClass=user)(sAMAccountName=sophie))" objectGUID objectSID
+# 10.22.17.50 is DC
+```
+
+#### reading system log with journalctl
+	journalctl --no-pager  # to fix line wrapp issue
+	journalctl -u docker.service  ## to see only docker related log
+	journalctl -r ## reverse display. lastest log first
+	journalctl --since 2017-07-17
+	journalctl -f  ## same as tail -f, follow logs
+	journalctl -e ## jump to the end of pager
+	journalctl -x  ## display some help msg when available
+#### troubleshoot joining mac to AD
+```shell
+sudo odutil set log debug
+sudo odutil set log default
+kinit $user@domain.name
+dsconfigad
+```
+
+#### enable SSHD on mac, from command line
+	sudo systemsetup -setremotelogin on
+	
 ----
 #### attach to a docker instance runing in background
 ```shell
@@ -18,11 +43,22 @@ docker save -o myimg.tar
 docker export -o myimg.tar
 ```
 
+#### make docker start with system
+	docker update --restart always admiring_mirzakhani
+
 #### import docker image with tag
 ```shell
 docker import myimg.tar -c "ENTRYPOINT docker-entrypoint.sh" myimg:v0.5.6
 ```
+#### run phpmyadmin docker on mysql host
 
+```shell
+docker run --name phpmyadmin -d -e PMA_HOST=10.22.16.18 -e PMA_USER=cms -e PMA_PASSWORD=hkldc -p 8080:80 phpmyadmin/phpmyadmin
+```
+
+#### check docker container logs
+	docker logs $container_name
+	
 #### how to exclude files when creating archive
 ```shell
 tar -czf archive_file.tar.gz target --exclude="*.zip" --exclude="*.war"
@@ -34,6 +70,10 @@ mount.cifs --verbose -o username='alan_cheng',\
 password='yourPass',sec=ntlm \
 \\\\epbyminw1383.minsk.epam.com\\install_VEL /mnt
 ```
+#### mount windows shares on Ubuntu 17 (no pwd required)
+```shell
+mount -t cifs //server/share /mnt
+```
 
 #### list samba users in its own database
 ```shell
@@ -42,14 +82,20 @@ pdbedit -L
 
 #### show all git commits in master that aren’t in experiment 
 
-```shell
-git log experiment..master
-```
+	git log experiment..master
 
 #### git checkout a single file (core.py) from another branch (e.g dev)
-```shell
-git checkout dev -- core.py
-```
+
+	git checkout dev -- core.py
+
+#### change last commit msg in git
+
+	git commit --amend
+	git push --force ## if previous commit msg has been pushed out
+
+#### disable SSL cert verify globally
+	git config --global http.sslVerify "false"
+	
 
 #### start configure sound device GUI
 ```shell
@@ -60,11 +106,6 @@ pavucontrol
 sudo ip route add 192.168.0.0/24 via 10.22.17.55 dev eno1
 ```
 
-#### change last commit msg in git
-```shell
-git commit --amend
-git push --force ## if previous commit msg has been pushed out
-```
 
 #### reconfigure lxd network (lxd init has been executed before)
 ```shell
@@ -86,7 +127,9 @@ VBoxManage extpack install name.extpack
 vboxmanage guestcontrol "<vbox_name>" updateadditions  --source /usr/share/virtualbox/VBoxGuestAdditions.iso --verbose
 vboxmanage guestproperty get "vm-name" "/VirtualBox/GuestInfo/Net/0/V4/IP"
 vboxmanage showvminfo WIN10_64
-
+vboxmanage controlvm "OpenBSD6.1" acpipowerbutton 
+vboxmanage modifyvm "OpenBSD6.1" --nic1 bridged
+vboxmanage modifyvm "OpenBSD6.1" --bridgeadapter1 eno1
 ```
 
 #### reset mysql root password
@@ -100,10 +143,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
 #or a more traditional method
 UPDATE mysql.user SET authentication_string = PASSWORD('new_password') WHERE User = 'root' AND Host = 'localhost';
 ```
-#### configure system env for JAVA_HOME in command line, on Windows
-```powershell
-setx /m JAVA_HOME "C:\Program Files\Java\jdk1.8.0_131"
-```
+
 
 #### run one time scheduled task with at
 ```shell
@@ -233,4 +273,3 @@ echo "b = $b"      #  b = abc23
 c=${!b}            #  Now, the more familiar type of indirect reference.
 echo $c            #  something_else
 ```
-

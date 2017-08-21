@@ -26,7 +26,7 @@ Be verbose and print the data of each packet in both hex and ASCII, also includi
 
 	tcpdump -v -XX
 Be less verbose (than the default) while capturing packets:
-
+https://www.google.com.hk/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=0ahUKEwi41-ncjqTVAhXMl5QKHcdHAU8QFggjMAA&url=http%3A%2F%2Fwww.tomsitpro.com%2Farticles%2Fflash-data-center-advantages%2C2-744-2.html&usg=AFQjCNEJxAM7407yKQn7KabKjT7FwvmIdA
 	tcpdump -q
 Limit the capture to 100 packets:
 
