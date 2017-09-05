@@ -62,6 +62,8 @@ http://img0.ph.126.net/6zoGLZ5Vi5b84qu1Mg9rQA==/666251269892102037.jpg
 
 戴风来 18136079232 huaian_dfl@126.com
 
+xda mydigital
+bsdplus alan
 
 nexus 5 blank screen on incoming calls:
 
@@ -70,3 +72,7 @@ You will see “When calls and notifications arrive” option >> Select “Alway
  Now from “Priority interruptions” >> Turn on “Calls”
  Reboot your device 
 |Do a test call to see if you smarphone’s display turns on when receiving a call. 
+
+
+option 2:
+Settings >Apps >All. Scroll down until you find App called 'Google Dialer' - check that "show notifications" tick box is ticked.
