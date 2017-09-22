@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+########## color output functions ####
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+function PrintRed {
+	echo -e ${RED}$*${NC}
+}
+######################################
+
+msg_file=$1
+msg_ok=true
+
+## comment out below line if ticket ID can be both upper case or lower
+case_matter='YES'
+
+## comment out below line if commit msg can start with spaces
+leading_space_ok='NO'
+
+RegexField1='^ASIA-[0-9]{1,9}'
+RegexField2='^\[[0-9]\]'
+##
+## regex_line='ASIA-[0-9]{1,9}[ ]+(\[[0-9]\]){0,1}[ ]*[a-zA-Z].{1,}'
+## rules for first line of commit msg:
+##
+## 1. start with a ticket ID, for example, ASIA-1234
+## 2. followed by: one or more space 
+## 3. followed by: number of reopens, enclosed in [], such as [2]. Optional. Single digit only.
+## 4. followed by: zero or more space
+## 5. followed by: ticket summary. Should start with letter
+##
+
+
+
+FirstLine=$(head -1 $msg_file)
+
+## check if leading spaces are allowed
+if [[ X"$leading_space_ok" == XNO ]]; then
+	leading_space=$(echo "$FirstLine" | egrep '^[ ]+')
+	if [[ -n "$leading_space" ]]; then
+		msg_ok=false
+		echo
+		PrintRed "*** commit msg not in compliance with policy"
+		PrintRed "*** start commit msg with ticket ID, not spaces"
+		echo
+	fi
+fi
+		
+
+Field1=$(echo "$FirstLine" | cut -d" " -f1)
+Field2=$(echo "$FirstLine" | cut -d" " -f2)
+
+if [[ X"$case_matter" == XYES ]]; then
+	Result01=$(echo "$Field1" | egrep "$RegexField1")
+else
+	Result01=$(echo "$Field1" | egrep -i "$RegexField1")
+fi
+
+if [[ -z "$Result01" ]]; then
+	if [[ "$msg_ok" == "true" ]]; then ## print warning only when not printed before 
+		echo
+		PrintRed "*** commit msg not in compliance with policy"
+	fi
+	PrintRed "*** start it with a ticket ID, like ASIA-6666"
+	echo
+	msg_ok=false
+fi
+
+Result2_ReOpen=$(echo "$Field2" | egrep "$RegexField2")
+if [[ -z "$Result2_ReOpen" ]];then  
+	## if field2 does not start with '[', it should NOT
+	## start with a digit, or a '[' either
+	## checking to see if it start with a digit
+	
+	Result2=$(echo "$Field2" | egrep "^([0-9]|\[|\])")
+	if [[ -n "$Result2" ]]; then
+		if [[ "$msg_ok" == "true" ]]; then ## print warning only when not printed before 
+			echo
+			PrintRed "*** commit msg not in compliance with policy"
+		fi
+		PrintRed "*** 2nd field should start with a non-digit word"
+		PrintRed "*** or enclose it with [] for ticket re-open mark"
+		echo
+		msg_ok=false
+	fi
+fi
+
+if [[ "$msg_ok" != "true" ]]; then
+	exit 2
+else
+	exit 0
+fi
+
