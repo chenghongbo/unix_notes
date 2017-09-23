@@ -15,6 +15,9 @@ list_recur() {
 		for i in `seq $count`
 		do
 			echo -n "$indent"
+			## print a $lead character (|) in place of its parent
+			## so that the look continous
+			test $i -eq $(($count - 1)) && echo -n "$lead"
 		done
 		if test $count -gt 0; then
 		#if [[ $count -gt 0 ]]; then
