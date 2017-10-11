@@ -118,6 +118,11 @@ lxc profile device set default eth0 parent eno1
 lxc profile device set default eth0 nictype macvlan
 ```
 
+#### configure lxd container to start at system boot
+```shell
+lxc config set machine boot.autostart true
+```
+
 #### manage virtualbox on CLI
 ```shell
 vboxmanage list vms
