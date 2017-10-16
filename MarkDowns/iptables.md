@@ -87,3 +87,55 @@ Ports can be forwarded from the external address to a machine on the private net
 ```
 iptables -t nat -A PREROUTING -p tcp -d 1.2.3.4 --dport 422 -j DNAT --to 192.168.0.100:22
 ```
+
+### open a specific port (here HTTP)
+```
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+```
+
+### ACCEPT	Accept all outgoing traffic
+```
+iptables -I OUTPUT -o eth0 -d 0.0.0.0/0 -j ACCEPT
+iptables -I INPUT -i eth0 -m state –state ESTABLISHED,RELATED -j 
+```
+### Accept incoming/outgoing icmp traffic
+```
+iptables -A OUTPUT -p icmp –icmp-type echo-request -j ACCEPT
+iptables -A OUTPUT -p icmp –icmp-type echo-reply -j ACCEPT
+iptables -A INPUT -p icmp –icmp-type echo-reply -j ACCEPT
+iptables -A INPUT -p icmp –icmp-type echo-request -j ACCEPT
+```
+### Deny all forwarding connections between interfaces
+```
+iptables -A FORWARD -i eth0 -o lo -j DROP
+iptables -A FORWARD -i lo -o eth0 -j DROP	
+```
+### Accept connection by 22 port
+```
+iptables -I INPUT -d 0.0.0.0/0 -j ACCEPT	Accept all incoming packages
+iptables -A INPUT -p tcp –dport 22 -j ACCEPT	
+```
+
+### Enable NAT postrouting
+```
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+```
+
+### Prevent DDoS attacks
+```
+iptables -N syn-flood
+iptables -A syn-flood -m limit –limit 100/second –limit-burst 150 -j RETURN
+iptables -A syn-flood -j LOG –log-prefix “SYN flood: “
+iptables -A syn-flood -j DROP
+```
+### DROP all strange TCP connections with no ACK answer
+```
+iptables -A INPUT -m state –state INVALID -j DROP	
+```
+```
+iptables -L INPUT –line-numbers	# Chains list with numbered rules
+iptables -D INPUT 2	# Remove second rule from INPUT chain
+iptables -t mangle -A PREROUTING -m conntrack –ctstate INVALID -j DROP	# Remove second rule from INPUT chain (???)
+iptables -t mangle -A PREROUTING -p tcp ! –syn -m conntrack –ctstate NEW -j DROP	# Remove second rule from INPUT chain (???)
+iptables -t mangle -A PREROUTING -p tcp -m conntrack –ctstate NEW -m tcpmss ! –mss 536:65535 -j DROP	# Remove second rule from INPUT chain (???)
+```
