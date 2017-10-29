@@ -278,3 +278,9 @@ echo "b = $b"      #  b = abc23
 c=${!b}            #  Now, the more familiar type of indirect reference.
 echo $c            #  something_else
 ```
+
+#### To increase the volume of the first audio track for 10dB use:
+
+```
+ffmpeg -i inputfile -vcodec copy -af "volume=10dB" outputfile
+```
