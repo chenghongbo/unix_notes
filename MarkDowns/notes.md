@@ -284,3 +284,13 @@ echo $c            #  something_else
 ```
 ffmpeg -i inputfile -vcodec copy -af "volume=10dB" outputfile
 ```
+
+#### disable subtitles by default, :s1 means first subtitle track ...
+```
+mkvpropedit  --edit track:s1 --set flag-default=0 --edit track:s2 --set flag-default=0 video.mkv
+```
+
+#### set 2nd (and last!) sound track to default
+```
+mkvpropedit  --edit track:a1 --set flag-default=0 --edit track:a2 --set flag-default=1 video.mkv
+```
