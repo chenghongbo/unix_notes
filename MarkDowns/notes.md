@@ -294,3 +294,8 @@ mkvpropedit  --edit track:s1 --set flag-default=0 --edit track:s2 --set flag-def
 ```
 mkvpropedit  --edit track:a1 --set flag-default=0 --edit track:a2 --set flag-default=1 video.mkv
 ```
+
+#### video scaling with ffmpeg
+```
+ffmpeg -i input.mp4 -vf scale=1280:720 output.mp4
+```
