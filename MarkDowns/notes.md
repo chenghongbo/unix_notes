@@ -42,6 +42,11 @@ docker save -o myimg.tar
 ```shell
 docker export -o myimg.tar
 ```
+#### check docker restart policy
+```
+docker inspect -f "{{ .HostConfig.RestartPolicy }}" ${container_name}
+# RestartPolicy has two properties Name, MaximumRetryCount
+```
 
 #### make docker start with system
 	docker update --restart always admiring_mirzakhani
@@ -330,3 +335,4 @@ Alt + w to mark end of selection
 Space to start selection
 Enter to end selection and copy
 ^b + ] to paste
+
