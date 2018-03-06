@@ -299,3 +299,34 @@ mkvpropedit  --edit track:a1 --set flag-default=0 --edit track:a2 --set flag-def
 ```
 ffmpeg -i input.mp4 -vf scale=1280:720 output.mp4
 ```
+
+#### convert VOB to mkv format with ffmpeg
+```
+ffmpeg \
+  -analyzeduration 1000M -probesize 1000M \
+  -i 04.vob \
+  -max_muxing_queue_size 9999 \
+  -map 0:1 -map 0:2 -map 0:3 -map 0:4 \
+  -metadata:s:a:0 language=cantonese -metadata:s:a:0 title="Cantonese stereo" \
+  -metadata:s:s:1 language=Cantonese -metadata:s:s:1 title="Cantonese" \
+  -metadata:s:s:0 language=Mandrin -metadata:s:s:0 title="Mandrin" \
+  -codec:v libx264 -crf 21 \
+  -codec:a libmp3lame -qscale:a 2 \
+  -codec:s copy \
+  04.mkv
+```
+
+#### copy and paste action in tmux EMACS mode
+
+^b + [ to enter copy mode
+^Space to start selection
+Alt + w to mark end of selection
+^y to paste buffer
+^b + # to list buffer
+^b + = to select which buffer to paste
+
+#### tmux copy and paste in VI mode
+^b + [ to enter copy mode
+Space to start selection
+Enter to end selection and copy
+^b + ] to paste
