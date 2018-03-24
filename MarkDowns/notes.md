@@ -106,6 +106,15 @@ pavucontrol
 sudo ip route add 192.168.0.0/24 via 10.22.17.55 dev eno1
 ```
 
+#### check deb package dependencies
+```
+dpkg-dep -I pckage.deb
+```
+
+#### ubuntu add i386 arch on 64bit system
+```
+dpkg --add-architecture i386
+```
 
 #### reconfigure lxd network (lxd init has been executed before)
 ```shell
