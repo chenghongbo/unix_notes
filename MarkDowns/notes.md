@@ -85,6 +85,13 @@ mount -t cifs //server/share /mnt
 pdbedit -L
 ```
 
+#### reset author info after you made a commit
+```
+# first, use git config [--global] user.name and user.email to set
+# your name and email, then:
+
+git commit --amend --reset-author
+```
 #### show all git commits in master that aren’t in experiment 
 
 	git log experiment..master
