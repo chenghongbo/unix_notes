@@ -352,3 +352,5 @@ Space to start selection
 Enter to end selection and copy
 ^b + ] to paste
 
+#### use keys with rsync
+rsync -av -e 'ssh -i sshkey.pem' config centos@qadb:/tmp/
