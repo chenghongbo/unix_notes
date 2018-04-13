@@ -80,3 +80,43 @@ option 2:
 Settings >Apps >All. Scroll down until you find App called 'Google Dialer' - check that "show notifications" tick box is ticked.
 
 2LCNHFJJ5NQS2
+
+The solution provided here is made with the following assumtions:
+
+I. NIC bonding has been chosen as the technology for NIC resiliency, other options (like NIC teaming) is not discussed
+II. each server has two NICs and already connected to different swtiches
+III. the focus of the solution is how to handle unexpected events or changes in NIC bonding, instead of how to configure it
+
+============================
+
+NIC bonding provides network fault tolerance for Linux systems, it can keep the system connected to network when one NIC goes down for any reason, by using another NIC. But, if both NICs stop working, a system still lose network connectivity and bonding won't be to help in such situation. Thus, means should be taken to ensure at least one NIC is functioning.
+
+For NIC bonding to work properly, the following prereq have to be met:
+
+1. bonding kernel module is loaded
+2. bond interface is configured correctly and activated on system boot
+3. at least one underlying NIC is functioning
+
+If the number of servers is small, we could write a script to configure NIC bonding and check its status periodically. But with large number of servers, in a geographically distributed network, we need something more powerful.
+
+With that in mind, here is my proposal to ensure NIC bonding: configure NIC bonding  and keep it in the desired state using Puppet.
+
+Puppet is chosen because we can configure NIC bondingf with it, more importantly, once NIC bonding is defined, it can monitor the servers continually and bring things back to its desired state when changes happen. And it's a proven system that can handle things like this in scale.
+
+From technical perspective, here are the things we need to configure to get NIC bonding working:
+
+1. Load module bonding if not already loaded 
+2. configure bond interface (or the master interface. referred to as bond0)
+3. configure the underlying physical interface (or slave interfaces)
+4. define state of both master and slave interfaces to be up
+
+1. Load module bonding if not already loaded 
+2. MII status of bond0 interface, and two bond slave interfaces
+3. Carrier status of slave interfaces
+4. network connectivity of bond0 interface
+5. Link failure count of slave interfaces
+
+
+
+References
+[1] https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/ch-configure_network_bonding
