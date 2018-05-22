@@ -52,6 +52,17 @@ Mobile backend functions.
 ### Virtual Machines
 - GCP's unmanaged compute service is Google Compute Engine. You can think of Compute Engine as providing an infrastructure as a service (IaaS), because the system provides a robust computing infrastructure, but you must choose and configure the platform components that you want to use. 
 
+## Storage Services
 
+- Cloud SQL. SQL databases, MySQL or PostGreSQL
+- Cloud Spanner. transactional consistency at global scale, schemas, SQL querying, and automatics synchronous replication for hight availability.
+- Cloud datastore. NoSQL data storage
+- Cloud Bigtable. NoSQL data storage
+- Cloud Storage. Object storage (like S3 in AWS)
+	- multi-Regional provides maximum availability and geo-redundancy
+	- regional provides high availability and a localized storage location
+	- Nearline provides low-cost archival storage ideal for data accessed less than once a month
+	- Coldline provides the lowest-cost archival storage for backup and disaster recovery
+- Persistent Disks. Block storage for computer engine. PD or SSD PD
 
 
