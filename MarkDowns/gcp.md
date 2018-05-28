@@ -1,8 +1,25 @@
 ## overview
 
--- global resources include preconfigured disk images, disk snapshots, and networks
--- Some resources can be accessed only by resources that are located in the same region. These regional resources include static external IP addresses
--- Other resources can be accessed only by resources that are located in the same zone. These zonal resources include VM instances, their types, and disks.
+-- global resources include:
+	preconfigured disk images
+	disk snapshots
+	networks
+	instance templates
+	VPC network
+	Firewalls
+	Routes
+	
+-- regional resources include 
+	static external IP addresses
+	subnets
+	Regional managed instance groups
+-- zonal resources include
+	VM instances and their types
+	disks
+	Zonal managed instance groups
+-- Regional resources can be used by any resources in that region, regardless of zone, while zonal resources can only be used by other resources in the same zone
+-- Notice that each region is independent of other regions and each zone is isolated from other zones in the same region.
+-- Certain resources, such as static IPs, images, firewall rules, and VPC networks, have defined project-wide quota limits and per-region quota limits. 
 
 ## projects
 
@@ -65,4 +82,11 @@ Mobile backend functions.
 	- Coldline provides the lowest-cost archival storage for backup and disaster recovery
 - Persistent Disks. Block storage for computer engine. PD or SSD PD
 
+## networking
+two types of VPC networks
+- auto mode
+When an auto mode VPC network is created, one subnet from each region is automatically created within it. These automatically created subnets use a set of predefined IP ranges which fit within the 10.128.0.0/9 CIDR block.
+- custom mode
+When a custom mode VPC network is created, no subnets are automatically created. This type of network provides you with complete control over its subnets and IP ranges. You decide which subnets to create, in regions you choose, and using IP ranges you specify.
+- Each project starts with a default auto mode network.
 
