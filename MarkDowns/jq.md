@@ -1,6 +1,7 @@
 ## with JSON format getting more & more popular, jq deserves a dedicated file
 ## here is content example json file
 
+```json
 {
 "key1": ["value10","value11","value12"],
 "key2": ["value20"],
@@ -9,7 +10,7 @@
         "subkey2": ["subvalue20","subvalue21"]
         }
 }
-
+```
 
 ### extract keys
 ```bash
