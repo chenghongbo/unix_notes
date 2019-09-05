@@ -352,5 +352,19 @@ Space to start selection
 Enter to end selection and copy
 ^b + ] to paste
 
+#### scroll copy & paste in screen 
+```
+Maybe there's a better way, but I'm used to scrolling using the "copy mode" (which you can use to copy text using screen itself, although that requires the paste command too):
+
+Hit your screen prefix combination (C-a / control+A by default), then hit `Escape`.
+
+Move up/down with the `arrow keys` (↑ and ↓).
+
+When you're done, hit q or Escape to get back to the end of the scroll buffer.
+
+(If instead of q or Escape you hit Enter or Return and then move the cursor, you will be selecting text to copy, and hitting Enter or Return a second time will copy it. Then you can paste with C-a followed by ].)
+
+Of course, you can always use more and less, two commonly used pagers, which may be enough for some commands.
+```
 #### use keys with rsync
 rsync -av -e 'ssh -i sshkey.pem' config centos@qadb:/tmp/
